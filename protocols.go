@@ -1,16 +1,18 @@
-package go_dpi
+// Package godpi contains the basic types and methods that the library provides.
+package godpi
 
+// Protocol is the type of each of the detected protocols.
 type Protocol string
 
 const (
-	Http = "HTTP"
-	Dns  = "DNS"
-	Ssh  = "SSH"
-	Rpc  = "RPC"
-	Smtp = "SMTP"
-	Rdp  = "RDP"
-	Smb  = "SMB"
-	Icmp = "ICMP"
-	Ftp  = "FTP"
-	Tls  = "TLS"
+	Http Protocol = "HTTP"
+	Dns  Protocol = "DNS"
+	Ssh  Protocol = "SSH"
+	Rpc  Protocol = "RPC"
+	Smtp Protocol = "SMTP"
+	Rdp  Protocol = "RDP"
+	Smb  Protocol = "SMB"
+	Icmp Protocol = "ICMP"
+	Ftp  Protocol = "FTP"
+	Tls  Protocol = "TLS"
 )

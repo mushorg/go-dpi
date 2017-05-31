@@ -6,10 +6,10 @@ import (
 
 type HttpClassifier struct{}
 
-func (_ HttpClassifier) HeuristicClassify(flow go_dpi.Flow) bool {
+func (_ HttpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ HttpClassifier) GetProtocol() go_dpi.Protocol {
-	return go_dpi.Http
+func (_ HttpClassifier) GetProtocol() godpi.Protocol {
+	return godpi.Http
 }
