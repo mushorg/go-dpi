@@ -1,6 +1,7 @@
 language: go
 go_import_path: github.com/mushorg/go-dpi
 install:
+- sudo apt-get install libpcap-dev
 - go get golang.org/x/tools/cmd/cover
 - go get github.com/mattn/goveralls
 - go get github.com/Masterminds/glide

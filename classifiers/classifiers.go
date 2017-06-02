@@ -19,7 +19,7 @@ type HeuristicClassifier interface {
 	HeuristicClassify(*godpi.Flow) bool
 }
 
-var classifiers = [...]GenericClassifier{
+var classifierList = [...]GenericClassifier{
 	HttpClassifier{},
 	RdpClassifier{},
 }
@@ -27,7 +27,7 @@ var classifiers = [...]GenericClassifier{
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
 // that is detected by a classifier if there is one. Otherwise, it returns nil.
 func ClassifyFlow(flow *godpi.Flow) (result godpi.Protocol) {
-	for _, classifier := range classifiers {
+	for _, classifier := range classifierList {
 		if heuristic, ok := classifier.(HeuristicClassifier); ok {
 			if heuristic.HeuristicClassify(flow) {
 				result = classifier.GetProtocol()
