@@ -20,8 +20,17 @@ type HeuristicClassifier interface {
 }
 
 var classifierList = [...]GenericClassifier{
+	DnsClassifier{},
+	FtpClassifier{},
 	HttpClassifier{},
+	IcmpClassifier{},
+	NetbiosClassifier{},
 	RdpClassifier{},
+	RpcClassifier{},
+	SmbClassifier{},
+	SmtpClassifier{},
+	SshClassifier{},
+	TlsClassifier{},
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
