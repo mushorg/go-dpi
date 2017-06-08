@@ -14,7 +14,7 @@ const (
 	Smb     Protocol = "SMB"
 	Icmp    Protocol = "ICMP"
 	Ftp     Protocol = "FTP"
-	Tls     Protocol = "TLS"
+	Ssl     Protocol = "SSL"
 	Netbios Protocol = "NetBIOS"
 	Unknown Protocol = ""
 )

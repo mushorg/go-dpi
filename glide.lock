@@ -1,6 +1,11 @@
-hash: f87778413d7751fb7371c3c627e3f0c5a96fd3fa7d37a50658083794e65c38c4
-updated: 2017-05-29T10:55:30.897409586+02:00
+hash: 6444fe2402f2485da4d8131ce7021d1423bc9ab2dfa98bc341f36b0a1d0d49f9
+updated: 2017-06-09T18:46:00.365696749+02:00
 imports:
 - name: github.com/google/gopacket
   version: b83f94714c36e30ce851be1d5a0a5226f9f1bca4
+  subpackages:
+  - layers
+  - pcap
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 testImports: []

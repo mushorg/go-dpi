@@ -5,9 +5,9 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-type TlsClassifier struct{}
+type SslClassifier struct{}
 
-func (_ TlsClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (_ SslClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -24,6 +24,6 @@ func (_ TlsClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ TlsClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Tls
+func (_ SslClassifier) GetProtocol() godpi.Protocol {
+	return godpi.Ssl
 }
