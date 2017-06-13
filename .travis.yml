@@ -8,7 +8,4 @@ install:
 - glide install
 script:
 - go test . ./classifiers
-- $HOME/gopath/bin/goveralls -ignore examples/main.go -service=travis-ci -repotoken $COVERALLS_TOKEN
-env:
-  global:
-    secure: lD2CnbjDs5+xas2byZ1t/NiQjUH0Bm962lWFEI3HcHWbqUKsgxd20gqTruc8906EOCiLksFK/M5EejmtpPIHLc8EdGFTBmZbik7TgVXwoQeV3Ft6Z0paJercX7ce6qY0M/cjWoB/wF3t6visXPyIxz3dui5bVJqHOuIf7IJL67YjJRkCJ4rT4LXA2giN+tLuz74UzuUt8YWtj8dld3UiMac5sLpgBtBhSMYltxKsjdjxzQSc26Tami/CevnCzk4feOSLaGOMoBNeYXR0ZS76M8NuxoA8hzA/UJ/lEM1b1lU17z9Ez9Xyo2vL3kgYeor5lIGj09zJRhoe5dS1zptQbWHNZj0FDbU3IC9JHHN14/Jaf/uBEn9gf5nGE1Zd+NYV7Kh0FuVAnvG9ZdQXEJ9GVkwdTxfwwINVkgg27Oca93tzecEiJ885p7jGL7+fuAHmI+weS6P/OwdMtiBXf1cOQ0THpqrKvWEYdp2ZBDGxmyiUbZlQm6wKs2t6Rbm58ynhlWI/0zsgkBP4Jp8cye1Q9GOCERtxH5+gk67MOTuL8hUffSHVtXsencVftcflE6aeARb8OP3Uw+SdAqgO0cGUaCra5faoh+KYjTrf304WXVWCyL61rr+9AH2n8HgyF95789yaSCY6oedQFdlpTF0f2aBXEaP18ktHSYreX0O2wbQ=
+- $HOME/gopath/bin/goveralls -ignore examples/example_app.go -service=travis-ci

@@ -1,22 +1,27 @@
 package classifiers
 
 import (
-	"github.com/google/gopacket"
-	"github.com/google/gopacket/pcap"
 	"github.com/mushorg/go-dpi"
 	"testing"
 )
 
 func TestClassifyFlow(t *testing.T) {
-	handle, err := pcap.OpenOffline("../examples/dumps/http.cap")
+	dumpPackets, err := godpi.ReadDumpFile("../examples/dumps/http.cap")
 	if err != nil {
 		t.Error(err)
 	}
-	packetSource := gopacket.NewPacketSource(handle, handle.LinkType()).Packets()
-	packet := <-packetSource
+	packet := <-dumpPackets
 	flow := godpi.CreateFlowFromPacket(&packet)
 	protocol := ClassifyFlow(flow)
 	if protocol != godpi.Http {
-		t.Error("Wrong protocol detected")
+		t.Error("Wrong protocol detected:", protocol)
+	}
+}
+
+func TestClassifyFlowEmpty(t *testing.T) {
+	flow := godpi.NewFlow()
+	protocol := ClassifyFlow(flow)
+	if protocol != godpi.Unknown {
+		t.Error("Protocol incorrectly detected:", protocol)
 	}
 }
