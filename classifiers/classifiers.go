@@ -30,7 +30,7 @@ var classifierList = [...]GenericClassifier{
 	SmbClassifier{},
 	SmtpClassifier{},
 	SshClassifier{},
-	TlsClassifier{},
+	SslClassifier{},
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
