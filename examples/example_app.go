@@ -65,11 +65,11 @@ func main() {
 
 		protocol = wrappers.ClassifyFlow(flow)
 		if protocol != godpi.Unknown {
-			fmt.Printf("nDPI says %s\n", protocol)
+			fmt.Printf("lpi says %s\n", protocol)
 			idCount++
 			protoCounts[protocol]++
 		} else {
-			fmt.Println("nDPI could not identify")
+			fmt.Println("lpi could not identify")
 		}
 
 		select {

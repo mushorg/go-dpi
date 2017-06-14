@@ -15,7 +15,8 @@ type Wrapper interface {
 	ClassifyFlow(*godpi.Flow) (godpi.Protocol, error)
 }
 
-var wrappersList = [...]Wrapper{
+var wrapperList = []Wrapper{
+	NewLPIWrapper(),
 	NewNDPIWrapper(),
 }
 
@@ -24,7 +25,7 @@ var activeWrappers []Wrapper
 // InitializeWrappers initializes all wrappers and filters out the ones
 // that don't get initialized correctly.
 func InitializeWrappers() {
-	for _, wrapper := range wrappersList {
+	for _, wrapper := range wrapperList {
 		err := wrapper.InitializeWrapper()
 		if err == nil {
 			activeWrappers = append(activeWrappers, wrapper)

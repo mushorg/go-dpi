@@ -35,7 +35,7 @@ func (wrapper *MockWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, erro
 func TestClassifyFlowUninitialized(t *testing.T) {
 	flow := godpi.NewFlow()
 	uninitialized := &MockWrapper{initializeSuccessfully: false}
-	wrappersList = [...]Wrapper{
+	wrapperList = []Wrapper{
 		uninitialized,
 	}
 	InitializeWrappers()
@@ -58,7 +58,7 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 func TestClassifyFlowInitialized(t *testing.T) {
 	flow := godpi.NewFlow()
 	initialized := &MockWrapper{initializeSuccessfully: true}
-	wrappersList = [...]Wrapper{
+	wrapperList = []Wrapper{
 		initialized,
 	}
 	InitializeWrappers()
