@@ -32,6 +32,10 @@ func (wrapper *MockWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, erro
 	return godpi.Http, nil
 }
 
+func (_ *MockWrapper) GetWrapperName() godpi.ClassificationSource {
+	return "mock"
+}
+
 func TestClassifyFlowUninitialized(t *testing.T) {
 	flow := godpi.NewFlow()
 	uninitialized := &MockWrapper{initializeSuccessfully: false}
@@ -42,12 +46,15 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 	if !uninitialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result := ClassifyFlow(flow)
+	result, source := ClassifyFlow(flow)
 	if uninitialized.classifyCalled {
 		t.Error("Classify called on uninitialized wrapper")
 	}
 	if result != godpi.Unknown {
 		t.Error("Empty classify did not return unknown")
+	}
+	if source != godpi.NoSource {
+		t.Error("Empty classify incorrectly returned source")
 	}
 	DestroyWrappers()
 	if uninitialized.destroyCalled {
@@ -65,11 +72,14 @@ func TestClassifyFlowInitialized(t *testing.T) {
 	if !initialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result := ClassifyFlow(flow)
+	result, source := ClassifyFlow(flow)
 	if !initialized.classifyCalled {
 		t.Error("Classify not called on active wrapper")
 	}
-	if result != godpi.Http {
+	if result != godpi.Http || flow.DetectedProtocol != godpi.Http {
+		t.Error("Classify did not return correct result")
+	}
+	if source != "mock" || flow.ClassificationSource != "mock" {
 		t.Error("Classify did not return correct result")
 	}
 	DestroyWrappers()

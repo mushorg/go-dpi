@@ -25,6 +25,9 @@ var lpiCodeToProtocol = map[uint32]godpi.Protocol{
 	37:  godpi.Netbios,
 }
 
+// LPIWrapperName is the identification of the libprotoident library.
+const LPIWrapperName = "libprotoident"
+
 // LPIWrapper is the wrapper for the LPI protocol identification library,
 // providing the methods used to interface with it from go-dpi.
 type LPIWrapper struct{}
@@ -61,4 +64,10 @@ func (wrapper *LPIWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, error
 		return proto, nil
 	}
 	return godpi.Unknown, nil
+}
+
+// GetWrapperName returns the name of the wrapper, in order to identify which
+// wrapper provided a classification.
+func (_ *LPIWrapper) GetWrapperName() godpi.ClassificationSource {
+	return LPIWrapperName
 }

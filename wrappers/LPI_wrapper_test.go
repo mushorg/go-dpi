@@ -32,3 +32,9 @@ func TestNDPIWrapperClassifyFlow(t *testing.T) {
 		t.Errorf("Incorrectly detected %s instead of Http", result)
 	}
 }
+
+func TestLPIWrapper_GetWrapperName(t *testing.T) {
+	if name := NewLPIWrapper().GetWrapperName(); name != LPIWrapperName {
+		t.Error("Wrong wrapper name returned:", name)
+	}
+}

@@ -26,6 +26,9 @@ var ndpiCodeToProtocol = map[uint32]godpi.Protocol{
 	10:  godpi.Netbios,
 }
 
+// NDPIWrapperName is the identification of the nDPI library.
+const NDPIWrapperName = "nDPI"
+
 // NDPIWrapperProvider provides NDPIWrapper with the implementations of the
 // methods to use.
 type NDPIWrapperProvider struct {
@@ -100,4 +103,10 @@ func (wrapper *NDPIWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, erro
 		}
 	}
 	return godpi.Unknown, nil
+}
+
+// GetWrapperName returns the name of the wrapper, in order to identify which
+// wrapper provided a classification.
+func (_ *NDPIWrapper) GetWrapperName() godpi.ClassificationSource {
+	return NDPIWrapperName
 }

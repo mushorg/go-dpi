@@ -104,3 +104,9 @@ func TestNDPIWrapper_ClassifyFlowErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestNDPIWrapper_GetWrapperName(t *testing.T) {
+	if name := NewNDPIWrapper().GetWrapperName(); name != NDPIWrapperName {
+		t.Error("Wrong wrapper name returned:", name)
+	}
+}

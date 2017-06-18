@@ -12,16 +12,19 @@ func TestClassifyFlow(t *testing.T) {
 	}
 	packet := <-dumpPackets
 	flow := godpi.CreateFlowFromPacket(&packet)
-	protocol := ClassifyFlow(flow)
-	if protocol != godpi.Http {
+	protocol, source := ClassifyFlow(flow)
+	if protocol != godpi.Http || flow.DetectedProtocol != godpi.Http {
 		t.Error("Wrong protocol detected:", protocol)
+	}
+	if name := flow.ClassificationSource; name != GoDPIName || source != GoDPIName {
+		t.Error("Wrong classification source returned:", name)
 	}
 }
 
 func TestClassifyFlowEmpty(t *testing.T) {
 	flow := godpi.NewFlow()
-	protocol := ClassifyFlow(flow)
-	if protocol != godpi.Unknown {
+	protocol, source := ClassifyFlow(flow)
+	if protocol != godpi.Unknown || source != godpi.NoSource {
 		t.Error("Protocol incorrectly detected:", protocol)
 	}
 }
