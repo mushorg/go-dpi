@@ -54,7 +54,7 @@ func main() {
 	for packet := range packetChannel {
 		fmt.Printf("Packet %d: ", count+1)
 		flow = godpi.CreateFlowFromPacket(&packet)
-		protocol = classifiers.ClassifyFlow(flow)
+		protocol, _ = classifiers.ClassifyFlow(flow)
 		if protocol != godpi.Unknown {
 			fmt.Printf("Identified as %s\n", protocol)
 			idCount++
@@ -63,13 +63,13 @@ func main() {
 			fmt.Println("Could not identify")
 		}
 
-		protocol = wrappers.ClassifyFlow(flow)
+		protocol, source := wrappers.ClassifyFlow(flow)
 		if protocol != godpi.Unknown {
-			fmt.Printf("nDPI says %s\n", protocol)
+			fmt.Printf("%s says %s\n", source, protocol)
 			idCount++
 			protoCounts[protocol]++
 		} else {
-			fmt.Println("nDPI could not identify")
+			fmt.Println("Wrappers could not identify")
 		}
 
 		select {
