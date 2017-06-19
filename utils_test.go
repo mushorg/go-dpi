@@ -7,7 +7,7 @@ import (
 
 func TestReadDumpFile(t *testing.T) {
 	var count int
-	packets, err := ReadDumpFile("examples/dumps/http.cap")
+	packets, err := ReadDumpFile("godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Error(err)
 	}

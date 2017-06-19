@@ -9,6 +9,8 @@ import (
 	"github.com/mushorg/go-dpi/wrappers"
 	"os"
 	"os/signal"
+	"github.com/google/gopacket/pcap"
+	"time"
 )
 
 func main() {
@@ -21,12 +23,23 @@ func main() {
 		err            error
 	)
 
-	filename := flag.String("filename", "dumps/http.cap", "File to read packets from")
+	filename := flag.String("filename", "godpi_example/dumps/http.cap", "File to read packets from")
+	device := flag.String("device", "", "Device to watch for packets")
 
 	flag.Parse()
 
-	// check if file exists
-	if _, err := os.Stat(*filename); os.IsNotExist(err) {
+	if *device != "" {
+		// check if interface was given
+		handle, deverr := pcap.OpenLive(*device, 1024, false, time.Duration(-1))
+		if deverr != nil {
+			fmt.Println("Error opening device:", deverr)
+			return
+		}
+		packetChannel = gopacket.NewPacketSource(handle, handle.LinkType()).Packets()
+	} else if _, ferr := os.Stat(*filename); !os.IsNotExist(ferr) {
+		// check if file exists
+		packetChannel, err = godpi.ReadDumpFile(*filename)
+	} else {
 		fmt.Println("File does not exist:", *filename)
 		return
 	}
@@ -45,7 +58,6 @@ func main() {
 	signal.Notify(signalChannel, os.Interrupt)
 	intSignal := false
 
-	packetChannel, err = godpi.ReadDumpFile(*filename)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -63,11 +75,17 @@ func main() {
 			fmt.Println("Could not identify")
 		}
 
-		protocol, source := wrappers.ClassifyFlow(flow)
-		if protocol != godpi.Unknown {
-			fmt.Printf("%s says %s\n", source, protocol)
-			idCount++
-			protoCounts[protocol]++
+		wrapperProtocol, source := wrappers.ClassifyFlow(flow)
+		if wrapperProtocol != godpi.Unknown {
+			fmt.Printf("%s says %s\n", source, wrapperProtocol)
+			if protocol == godpi.Unknown {
+				idCount++
+				protoCounts[wrapperProtocol]++
+			} else if protocol != wrapperProtocol {
+				// go-dpi and wrapper detected different protocols
+				fmt.Printf("PROTOCOL MISMATCH! go-dpi identified flow " +
+					"as %s, while %s detected it as %s\n", protocol, source, wrapperProtocol)
+			}
 		} else {
 			fmt.Println("Wrappers could not identify")
 		}
@@ -83,8 +101,4 @@ func main() {
 		}
 		count++
 	}
-	fmt.Println()
-	fmt.Println("Number of packets:", count)
-	fmt.Println("Number of packets identified:", idCount)
-	fmt.Println("Protocols identified:\n", protoCounts)
 }

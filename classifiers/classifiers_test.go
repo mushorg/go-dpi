@@ -6,7 +6,7 @@ import (
 )
 
 func TestClassifyFlow(t *testing.T) {
-	dumpPackets, err := godpi.ReadDumpFile("../examples/dumps/http.cap")
+	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Error(err)
 	}
