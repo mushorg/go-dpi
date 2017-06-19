@@ -26,6 +26,11 @@ func NewFlow() (flow *Flow) {
 // CreateFlowFromPacket creates a flow with a single packet.
 func CreateFlowFromPacket(packet *gopacket.Packet) (flow *Flow) {
 	flow = NewFlow()
-	flow.Packets = append(flow.Packets, packet)
+	flow.AddPacket(packet)
 	return
+}
+
+// AddPacket adds a new packet to the flow.
+func (flow *Flow) AddPacket(packet *gopacket.Packet) {
+	flow.Packets = append(flow.Packets, packet)
 }

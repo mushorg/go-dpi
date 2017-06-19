@@ -10,7 +10,7 @@ func TestNDPIWrapperClassifyFlow(t *testing.T) {
 	wrapper.InitializeWrapper()
 	defer wrapper.DestroyWrapper()
 
-	packetChan, _ := godpi.ReadDumpFile("../examples/dumps/http.cap")
+	packetChan, _ := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
 
 	flow := godpi.NewFlow()
 	for i := 0; i < 3; i++ {

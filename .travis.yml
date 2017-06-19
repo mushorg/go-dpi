@@ -15,4 +15,4 @@ install:
 - cd ~/nDPI && ./autogen.sh && ./configure && make && sudo make install && cd -
 script:
 - go test . ./classifiers ./wrappers
-- $HOME/gopath/bin/goveralls -ignore examples/example_app.go -service=travis-ci
+- $HOME/gopath/bin/goveralls -ignore godpi_example/example_app.go -service=travis-ci
