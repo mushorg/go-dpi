@@ -1,18 +1,21 @@
 language: go
 dist: trusty
 sudo: required
+services:
+    - docker
 go_import_path: github.com/mushorg/go-dpi
 before_install:
-- echo "deb http://packages.wand.net.nz trusty main" | sudo tee -a /etc/apt/sources.list
-- sudo apt-get update
-- git clone --branch 2.0-stable https://github.com/ntop/nDPI/ ~/nDPI
+    - echo "deb http://packages.wand.net.nz trusty main" | sudo tee -a /etc/apt/sources.list
+    - sudo apt-get update
+    - git clone --branch 2.0-stable https://github.com/ntop/nDPI/ ~/nDPI
 install:
-- sudo apt-get -y --force-yes install libpcap-dev libtrace4 libtrace4-dev libprotoident libprotoident-dev
-- go get golang.org/x/tools/cmd/cover
-- go get github.com/mattn/goveralls
-- go get github.com/Masterminds/glide
-- glide install
-- cd ~/nDPI && ./autogen.sh && ./configure && make && sudo make install && cd -
+    - sudo apt-get -y --force-yes install libpcap-dev libtrace4 libtrace4-dev libprotoident libprotoident-dev
+    - go get golang.org/x/tools/cmd/cover
+    - go get github.com/mattn/goveralls
+    - go get github.com/Masterminds/glide
+    - glide install
+    - cd ~/nDPI && ./autogen.sh && ./configure && make && sudo make install && cd -
 script:
-- go test . ./classifiers ./wrappers
-- $HOME/gopath/bin/goveralls -ignore godpi_example/example_app.go -service=travis-ci
+    - sudo docker build -t godpi-example . && sudo docker run godpi-example
+    - go test . ./classifiers ./wrappers
+    - $HOME/gopath/bin/goveralls -ignore godpi_example/example_app.go -service=travis-ci
