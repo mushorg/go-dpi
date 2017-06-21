@@ -16,5 +16,6 @@ const (
 	Ftp     Protocol = "FTP"
 	Ssl     Protocol = "SSL"
 	Netbios Protocol = "NetBIOS"
+	Hangout	Protocol = "Hangout"
 	Unknown Protocol = ""
 )
