@@ -36,6 +36,7 @@ var classifierList = [...]GenericClassifier{
 	SshClassifier{},
 	SslClassifier{},
 	HangoutClassifier{},
+	GitClassifier{},
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
