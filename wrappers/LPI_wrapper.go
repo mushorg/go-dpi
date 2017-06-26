@@ -17,6 +17,7 @@ var lpiCodeToProtocol = map[uint32]godpi.Protocol{
 	8:   godpi.Ssh,
 	23:  godpi.Rpc,
 	1:   godpi.Smtp,
+	92:  godpi.Smtp,
 	21:  godpi.Rdp,
 	24:  godpi.Smb,
 	380: godpi.Icmp,
