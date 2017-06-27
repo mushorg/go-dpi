@@ -10,6 +10,69 @@ It attempts to classify flows to different protocols regardless of the ports use
 
 It is being developed in the context of the Google Summer of Code 2017 program, under the mentorship of The Honeynet Project.
 
-go-dpi is available under the MIT license and distributed in source code format.
-
 Please read the project's [Wiki page](https://github.com/mushorg/go-dpi/wiki) for more information.
+
+## Example usage
+
+The library and the modules APIs aim to be very simple and straightforward to use. The library relies on the [gopacket](https://godoc.org/github.com/google/gopacket) library and its Packet structure. Once you have a Packet in your hands, it's very easy to classify it with the library.
+First you need a flow that contains the packet. There is a helper function for constructing a flow from a single packet. Simply call:
+
+```go
+flow := godpi.CreateFlowFromPacket(&packet)
+```
+
+Afterwards, classifying the flow can be done by simply calling:
+
+```go
+proto, source := classifiers.ClassifyFlow(flow)
+```
+
+This returns the guess protocol by the classifiers as well as the source (which in this case will always be go-dpi).
+
+The same thing applies for wrappers. However, for wrappers you also have to call the initialize function, and the destroy function before your program exits. All in all, the following is enough to run the wrappers:
+
+```go
+wrappers.InitializeWrappers()
+defer wrappers.DestroyWrappers()
+proto, source = wrappers.ClassifyFlow(flow)
+```
+
+A minimal example application is included below. It uses both the classifiers and wrappers to classify a simple packet capture file. Note the helpful `godpi.ReadDumpFile` function that simply returns a channel with all the packets in the file.
+
+```go
+package main
+
+import "fmt"
+import "github.com/mushorg/go-dpi"
+import "github.com/mushorg/go-dpi/classifiers"
+import "github.com/mushorg/go-dpi/wrappers"
+
+func main() {
+	packets, err := godpi.ReadDumpFile("/tmp/http.cap")
+	wrappers.InitializeWrappers()
+	defer wrappers.DestroyWrappers()
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for packet := range packets {
+			flow := godpi.CreateFlowFromPacket(&packet)
+			proto, source := classifiers.ClassifyFlow(flow)
+			if proto != godpi.Unknown {
+				fmt.Println(source, "detected protocol", proto)
+			} else {
+				fmt.Println("No detection made by classifiers")
+			}
+			proto, source = wrappers.ClassifyFlow(flow)
+			if proto != godpi.Unknown {
+				fmt.Println(source, "detected protocol", proto)
+			} else {
+				fmt.Println("No detection made by wrappers")
+			}
+		}
+	}
+}
+```
+
+## License
+
+go-dpi is available under the MIT license and distributed in source code format.
