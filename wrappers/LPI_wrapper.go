@@ -12,18 +12,19 @@ import (
 
 // lpiCodeToProtocol maps the LPI protocol codes to go-dpi protocols.
 var lpiCodeToProtocol = map[uint32]godpi.Protocol{
-	0:   godpi.Http,
-	14:  godpi.Dns,
-	201: godpi.Dns,
-	8:   godpi.Ssh,
-	23:  godpi.Rpc,
-	1:   godpi.Smtp,
-	21:  godpi.Rdp,
-	24:  godpi.Smb,
-	380: godpi.Icmp,
-	27:  godpi.Ftp,
-	12:  godpi.Ssl,
-	37:  godpi.Netbios,
+	0:   godpi.Http,     // LPI_PROTO_HTTP
+	14:  godpi.Dns,      // LPI_PROTO_DNS
+	201: godpi.Dns,      // LPI_PROTO_UDP_DNS
+	8:   godpi.Ssh,      // LPI_PROTO_SSH
+	23:  godpi.Rpc,      // LPI_PROTO_RPC_SCAN
+	1:   godpi.Smtp,     // LPI_PROTO_SMTP
+	92:  godpi.Smtp,     // LPI_PROTO_INVALID_SMTP
+	21:  godpi.Rdp,      // LPI_PROTO_RDP
+	24:  godpi.Smb,      // LPI_PROTO_SMB
+	380: godpi.Icmp,     // LPI_PROTO_ICMP
+	27:  godpi.Ftp,      // LPI_PROTO_FTP_CONTROL
+	12:  godpi.Ssl,      // LPI_PROTO_SSL
+	37:  godpi.Netbios,  // LPI_PROTO_NETBIOS
 }
 
 // LPIWrapperName is the identification of the libprotoident library.

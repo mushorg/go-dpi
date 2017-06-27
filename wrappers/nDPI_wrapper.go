@@ -13,18 +13,18 @@ import (
 
 // ndpiCodeToProtocol maps the nDPI protocol codes to go-dpi protocols.
 var ndpiCodeToProtocol = map[uint32]godpi.Protocol{
-	7:   godpi.Http,
-	5:   godpi.Dns,
-	92:  godpi.Ssh,
-	127: godpi.Rpc,
-	3:   godpi.Smtp,
-	88:  godpi.Rdp,
-	16:  godpi.Smb,
-	81:  godpi.Icmp,
-	1:   godpi.Ftp,
-	91:  godpi.Ssl,
-	64:  godpi.Ssl,
-	10:  godpi.Netbios,
+	7:   godpi.Http,       // NDPI_PROTOCOL_HTTP
+	5:   godpi.Dns,        // NDPI_PROTOCOL_DNS
+	92:  godpi.Ssh,        // NDPI_PROTOCOL_SSH
+	127: godpi.Rpc,        // NDPI_PROTOCOL_DCERPC
+	3:   godpi.Smtp,       // NDPI_PROTOCOL_MAIL_SMTP
+	88:  godpi.Rdp,        // NDPI_PROTOCOL_RDP
+	16:  godpi.Smb,        // NDPI_PROTOCOL_SMB
+	81:  godpi.Icmp,       // NDPI_PROTOCOL_IP_ICMP
+	1:   godpi.Ftp,        // NDPI_PROTOCOL_FTP_CONTROL
+	91:  godpi.Ssl,        // NDPI_PROTOCOL_SSL
+	64:  godpi.Ssl,        // NDPI_PROTOCOL_SSL_NO_CERT
+	10:  godpi.Netbios,    // NDPI_PROTOCOL_NETBIOS
 }
 
 // NDPIWrapperName is the identification of the nDPI library.
