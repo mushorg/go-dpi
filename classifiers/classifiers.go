@@ -24,16 +24,16 @@ type HeuristicClassifier interface {
 }
 
 var classifierList = [...]GenericClassifier{
-	DnsClassifier{},
-	FtpClassifier{},
-	HttpClassifier{},
+	DNSClassifier{},
+	FTPClassifier{},
+	HTTPClassifier{},
 	IcmpClassifier{},
 	NetbiosClassifier{},
 	RdpClassifier{},
-	RpcClassifier{},
+	RPCClassifier{},
 	SmbClassifier{},
-	SmtpClassifier{},
-	SshClassifier{},
+	SMTPClassifier{},
+	SSHClassifier{},
 	SslClassifier{},
 }
 

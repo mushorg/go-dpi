@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
+// NetbiosClassifier struct
 type NetbiosClassifier struct{}
 
-func (_ NetbiosClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for NetbiosClassifier
+func (classifier NetbiosClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -31,6 +33,7 @@ func (_ NetbiosClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ NetbiosClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier NetbiosClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Netbios
 }

@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
+// IcmpClassifier struct
 type IcmpClassifier struct{}
 
-func (_ IcmpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for IcmpClassifier
+func (classifier IcmpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -27,6 +29,7 @@ func (_ IcmpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return false
 }
 
-func (_ IcmpClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier IcmpClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Icmp
 }

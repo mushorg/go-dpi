@@ -1,9 +1,10 @@
 package wrappers
 
 import (
-	"github.com/mushorg/go-dpi"
 	"strings"
 	"testing"
+
+	"github.com/mushorg/go-dpi"
 )
 
 func TestNewNDPIWrapper(t *testing.T) {
@@ -66,7 +67,7 @@ func TestNDPIWrapper_DestroyWrapper(t *testing.T) {
 }
 
 func TestNDPIWrapper_ClassifyFlowErrors(t *testing.T) {
-	var retVal int32 = 0
+	var retVal int32
 	timesCalled := 0
 
 	wrapper := &NDPIWrapper{

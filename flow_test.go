@@ -1,9 +1,10 @@
 package godpi
 
 import (
+	"testing"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"testing"
 )
 
 func TestNewFlow(t *testing.T) {

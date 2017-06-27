@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
+// SmbClassifier struct
 type SmbClassifier struct{}
 
-func (_ SmbClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for SmbClassifier
+func (classifier SmbClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -25,6 +27,7 @@ func (_ SmbClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ SmbClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier SmbClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Smb
 }

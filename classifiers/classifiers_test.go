@@ -1,8 +1,9 @@
 package classifiers
 
 import (
-	"github.com/mushorg/go-dpi"
 	"testing"
+
+	"github.com/mushorg/go-dpi"
 )
 
 func TestClassifyFlow(t *testing.T) {

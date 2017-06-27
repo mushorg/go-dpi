@@ -3,26 +3,28 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/google/gopacket"
+	"github.com/google/gopacket/pcap"
 	"github.com/mushorg/go-dpi"
 	"github.com/mushorg/go-dpi/classifiers"
 	"github.com/mushorg/go-dpi/wrappers"
-	"os"
-	"os/signal"
-	"github.com/google/gopacket/pcap"
-	"time"
 )
 
 func main() {
 	var (
 		count, idCount int
-		protoCounts    map[godpi.Protocol]int = make(map[godpi.Protocol]int)
+		protoCounts    map[godpi.Protocol]int
 		packetChannel  <-chan gopacket.Packet
 		flow           *godpi.Flow
 		protocol       godpi.Protocol
 		err            error
 	)
 
+	protoCounts = make(map[godpi.Protocol]int)
 	filename := flag.String("filename", "godpi_example/dumps/http.cap", "File to read packets from")
 	device := flag.String("device", "", "Device to watch for packets")
 
@@ -83,7 +85,7 @@ func main() {
 				protoCounts[wrapperProtocol]++
 			} else if protocol != wrapperProtocol {
 				// go-dpi and wrapper detected different protocols
-				fmt.Printf("PROTOCOL MISMATCH! go-dpi identified flow " +
+				fmt.Printf("PROTOCOL MISMATCH! go-dpi identified flow "+
 					"as %s, while %s detected it as %s\n", protocol, source, wrapperProtocol)
 			}
 		} else {

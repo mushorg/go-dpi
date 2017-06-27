@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-type DnsClassifier struct{}
+// DNSClassifier struct
+type DNSClassifier struct{}
 
-func (_ DnsClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for DNSClassifier
+func (classifier DNSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -25,6 +27,7 @@ func (_ DnsClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ DnsClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier DNSClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Dns
 }

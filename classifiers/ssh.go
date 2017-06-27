@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-type SshClassifier struct{}
+// SSHClassifier struct
+type SSHClassifier struct{}
 
-func (_ SshClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for SMTPClassifier
+func (classifier SSHClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -24,6 +26,7 @@ func (_ SshClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ SshClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier SSHClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Ssh
 }

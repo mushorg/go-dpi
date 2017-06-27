@@ -5,8 +5,9 @@ package wrappers
 // #include "LPI_wrapper_impl.hpp"
 import "C"
 import (
-	"github.com/mushorg/go-dpi"
 	"unsafe"
+
+	"github.com/mushorg/go-dpi"
 )
 
 // lpiCodeToProtocol maps the LPI protocol codes to go-dpi protocols.
@@ -68,6 +69,6 @@ func (wrapper *LPIWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, error
 
 // GetWrapperName returns the name of the wrapper, in order to identify which
 // wrapper provided a classification.
-func (_ *LPIWrapper) GetWrapperName() godpi.ClassificationSource {
+func (wrapper *LPIWrapper) GetWrapperName() godpi.ClassificationSource {
 	return LPIWrapperName
 }

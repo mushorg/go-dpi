@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-type FtpClassifier struct{}
+// FTPClassifier struct
+type FTPClassifier struct{}
 
-func (_ FtpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for FTPClassifier
+func (classifier FTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -25,6 +27,7 @@ func (_ FtpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ FtpClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier FTPClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Ftp
 }

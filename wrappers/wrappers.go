@@ -4,6 +4,7 @@ package wrappers
 
 import (
 	"fmt"
+
 	"github.com/mushorg/go-dpi"
 )
 
@@ -31,7 +32,7 @@ func InitializeWrappers() {
 		if err == nil {
 			activeWrappers = append(activeWrappers, wrapper)
 		} else {
-			fmt.Println("Error initializing wrapper:", err)
+			fmt.Printf("Error initializing wrapper: %s: %s\n", wrapper.GetWrapperName(), err)
 		}
 	}
 }

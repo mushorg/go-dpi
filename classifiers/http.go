@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-type HttpClassifier struct{}
+// HTTPClassifier struct
+type HTTPClassifier struct{}
 
-func (_ HttpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for HTTPClassifier
+func (classifier HTTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -25,6 +27,7 @@ func (_ HttpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ HttpClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier HTTPClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Http
 }

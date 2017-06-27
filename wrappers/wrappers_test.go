@@ -1,9 +1,10 @@
 package wrappers
 
 import (
+	"testing"
+
 	"github.com/mushorg/go-dpi"
 	"github.com/pkg/errors"
-	"testing"
 )
 
 type MockWrapper struct {
@@ -17,9 +18,8 @@ func (wrapper *MockWrapper) InitializeWrapper() error {
 	wrapper.initializeCalled = true
 	if wrapper.initializeSuccessfully {
 		return nil
-	} else {
-		return errors.New("Init fail")
 	}
+	return errors.New("Init fail")
 }
 
 func (wrapper *MockWrapper) DestroyWrapper() error {
@@ -32,7 +32,7 @@ func (wrapper *MockWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, erro
 	return godpi.Http, nil
 }
 
-func (_ *MockWrapper) GetWrapperName() godpi.ClassificationSource {
+func (wrapper *MockWrapper) GetWrapperName() godpi.ClassificationSource {
 	return "mock"
 }
 

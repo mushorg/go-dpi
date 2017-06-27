@@ -5,9 +5,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-type RpcClassifier struct{}
+// RPCClassifier struct
+type RPCClassifier struct{}
 
-func (_ RpcClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for RPCClassifier
+func (classifier RPCClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -25,6 +27,7 @@ func (_ RpcClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return true
 }
 
-func (_ RpcClassifier) GetProtocol() godpi.Protocol {
+// GetProtocol returns the corresponding protocol
+func (classifier RPCClassifier) GetProtocol() godpi.Protocol {
 	return godpi.Rpc
 }

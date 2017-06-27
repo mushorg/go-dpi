@@ -5,9 +5,10 @@ package wrappers
 // #include "nDPI_wrapper_impl.h"
 import "C"
 import (
+	"unsafe"
+
 	"github.com/mushorg/go-dpi"
 	"github.com/pkg/errors"
-	"unsafe"
 )
 
 // ndpiCodeToProtocol maps the nDPI protocol codes to go-dpi protocols.
@@ -66,7 +67,7 @@ func NewNDPIWrapper() *NDPIWrapper {
 // InitializeWrapper initializes the nDPI wrapper.
 func (wrapper *NDPIWrapper) InitializeWrapper() error {
 	if (*wrapper.provider).ndpiInitialize() != 0 {
-		return errors.New("nDPI global structure initialization failed:")
+		return errors.New("nDPI global structure initialization failed")
 	}
 	return nil
 }
@@ -107,6 +108,6 @@ func (wrapper *NDPIWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, erro
 
 // GetWrapperName returns the name of the wrapper, in order to identify which
 // wrapper provided a classification.
-func (_ *NDPIWrapper) GetWrapperName() godpi.ClassificationSource {
+func (wrapper *NDPIWrapper) GetWrapperName() godpi.ClassificationSource {
 	return NDPIWrapperName
 }
