@@ -2,7 +2,10 @@
 // and the helpers for applying them on a flow.
 package classifiers
 
-import "github.com/mushorg/go-dpi"
+import (
+	"github.com/google/gopacket"
+	"github.com/mushorg/go-dpi"
+)
 
 // GoDPIName is the name of the library, to be used as an identifier for the
 // source of a classification.
@@ -52,4 +55,19 @@ func ClassifyFlow(flow *godpi.Flow) (result godpi.Protocol, source godpi.Classif
 		}
 	}
 	return
+}
+
+// checkFlowLayer applies the check function to the specified layer of each
+// packet in a flow, where it is available. It returns whether there is a
+// packet in the flow for which the check function returns true.
+func checkFlowLayer(flow *godpi.Flow, layerType gopacket.LayerType,
+	checkFunc func(layer gopacket.Layer) bool) bool {
+	for _, packet := range flow.Packets {
+		if layer := (*packet).Layer(layerType); layer != nil {
+			if checkFunc(layer) {
+				return true
+			}
+		}
+	}
+	return false
 }
