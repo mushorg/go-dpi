@@ -29,7 +29,7 @@ func (wrapper *MockWrapper) DestroyWrapper() error {
 
 func (wrapper *MockWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, error) {
 	wrapper.classifyCalled = true
-	return godpi.Http, nil
+	return godpi.HTTP, nil
 }
 
 func (wrapper *MockWrapper) GetWrapperName() godpi.ClassificationSource {
@@ -76,7 +76,7 @@ func TestClassifyFlowInitialized(t *testing.T) {
 	if !initialized.classifyCalled {
 		t.Error("Classify not called on active wrapper")
 	}
-	if result != godpi.Http || flow.DetectedProtocol != godpi.Http {
+	if result != godpi.HTTP || flow.DetectedProtocol != godpi.HTTP {
 		t.Error("Classify did not return correct result")
 	}
 	if source != "mock" || flow.ClassificationSource != "mock" {

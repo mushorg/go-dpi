@@ -6,11 +6,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-// IcmpClassifier struct
-type IcmpClassifier struct{}
+// ICMPClassifier struct
+type ICMPClassifier struct{}
 
-// HeuristicClassify for IcmpClassifier
-func (_ IcmpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for ICMPClassifier
+func (_ ICMPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	hasICMP4Packet := checkFlowLayer(flow, layers.LayerTypeIPv4, func(layer gopacket.Layer) bool {
 		ipLayer := layer.(*layers.IPv4)
 		return ipLayer.Protocol == layers.IPProtocolICMPv4
@@ -24,6 +24,6 @@ func (_ IcmpClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier IcmpClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Icmp
+func (classifier ICMPClassifier) GetProtocol() godpi.Protocol {
+	return godpi.ICMP
 }

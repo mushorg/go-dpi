@@ -29,5 +29,5 @@ func (classifier FTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 
 // GetProtocol returns the corresponding protocol
 func (classifier FTPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Ftp
+	return godpi.FTP
 }

@@ -26,8 +26,8 @@ func TestNDPIWrapperClassification(t *testing.T) {
 	result, err := wrapper.ClassifyFlow(flow)
 	wrapper.DestroyWrapper()
 
-	if result != godpi.Http || err != nil {
-		t.Errorf("Incorrectly detected flow protocol: %s instead of Http", result)
+	if result != godpi.HTTP || err != nil {
+		t.Errorf("Incorrectly detected flow protocol: %s instead of HTTP", result)
 	}
 }
 

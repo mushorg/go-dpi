@@ -41,5 +41,5 @@ func (_ HTTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 
 // GetProtocol returns the corresponding protocol
 func (classifier HTTPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Http
+	return godpi.HTTP
 }

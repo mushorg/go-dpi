@@ -21,5 +21,5 @@ func (_ SSHClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 
 // GetProtocol returns the corresponding protocol
 func (classifier SSHClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Ssh
+	return godpi.SSH
 }

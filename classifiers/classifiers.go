@@ -30,14 +30,14 @@ var classifierList = [...]GenericClassifier{
 	DNSClassifier{},
 	FTPClassifier{},
 	HTTPClassifier{},
-	IcmpClassifier{},
-	NetbiosClassifier{},
-	RdpClassifier{},
+	ICMPClassifier{},
+	NetBIOSClassifier{},
+	RDPClassifier{},
 	RPCClassifier{},
-	SmbClassifier{},
+	SMBClassifier{},
 	SMTPClassifier{},
 	SSHClassifier{},
-	SslClassifier{},
+	SSLClassifier{},
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol

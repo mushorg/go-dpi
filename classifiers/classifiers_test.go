@@ -3,9 +3,9 @@ package classifiers
 import (
 	"testing"
 
-	"github.com/mushorg/go-dpi"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+	"github.com/mushorg/go-dpi"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ func TestClassifyFlow(t *testing.T) {
 	packet := <-dumpPackets
 	flow := godpi.CreateFlowFromPacket(&packet)
 	protocol, source := ClassifyFlow(flow)
-	if protocol != godpi.Http || flow.DetectedProtocol != godpi.Http {
+	if protocol != godpi.HTTP || flow.DetectedProtocol != godpi.HTTP {
 		t.Error("Wrong protocol detected:", protocol)
 	}
 	if name := flow.ClassificationSource; name != GoDPIName || source != GoDPIName {
@@ -94,5 +94,44 @@ func TestCheckFirstPayload(t *testing.T) {
 	}
 	if !called {
 		t.Error("Callback was never called")
+	}
+}
+
+func getPcapDumpProtoMap(filename string) (result map[godpi.Protocol]int) {
+	result = make(map[godpi.Protocol]int)
+	packets, err := godpi.ReadDumpFile(filename)
+	if err != nil {
+		return
+	}
+	for packet := range packets {
+		flow := godpi.CreateFlowFromPacket(&packet)
+		res, _ := ClassifyFlow(flow)
+		result[res]++
+	}
+	return
+}
+
+type protocolTestInfo struct {
+	protocol godpi.Protocol
+	filename string
+	count    int
+}
+
+func TestClassifiers(t *testing.T) {
+	// test for each protocol the expected number of packets in the appropriate capture file
+	protocolInfos := []protocolTestInfo{
+		{godpi.HTTP, "../godpi_example/dumps/http.cap", 2},
+		{godpi.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 11},
+		{godpi.ICMP, "../godpi_example/dumps/dns+icmp.pcapng", 22},
+		{godpi.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
+		{godpi.SSL, "../godpi_example/dumps/https.cap", 1},
+		{godpi.SSH, "../godpi_example/dumps/ssh.pcap", 2},
+	}
+	for _, info := range protocolInfos {
+		count := getPcapDumpProtoMap(info.filename)[info.protocol]
+		if count != info.count {
+			t.Errorf("Wrong %s packet count in file %s: expected %d, found %d",
+				info.protocol, info.filename, info.count, count)
+		}
 	}
 }

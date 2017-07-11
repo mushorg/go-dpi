@@ -6,11 +6,11 @@ import (
 	"github.com/mushorg/go-dpi"
 )
 
-// SslClassifier struct
-type SslClassifier struct{}
+// SSLClassifier struct
+type SSLClassifier struct{}
 
-// HeuristicClassify for SslClassifier
-func (_ SslClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+// HeuristicClassify for SSLClassifier
+func (_ SSLClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	return checkFirstPayload(flow, layers.LayerTypeTCP, func(payload []byte) (detected bool) {
 		if len(payload) >= 9 {
 			packetLen := int(binary.BigEndian.Uint16(payload[3:5]))
@@ -27,6 +27,6 @@ func (_ SslClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier SslClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Ssl
+func (classifier SSLClassifier) GetProtocol() godpi.Protocol {
+	return godpi.SSL
 }

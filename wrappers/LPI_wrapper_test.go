@@ -28,8 +28,8 @@ func TestNDPIWrapperClassifyFlow(t *testing.T) {
 	flow.Packets = append(flow.Packets, &packet)
 
 	// fourth packet should be HTTP
-	if result, _ := wrapper.ClassifyFlow(flow); result != godpi.Http {
-		t.Errorf("Incorrectly detected %s instead of Http", result)
+	if result, _ := wrapper.ClassifyFlow(flow); result != godpi.HTTP {
+		t.Errorf("Incorrectly detected %s instead of HTTP", result)
 	}
 }
 
