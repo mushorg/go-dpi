@@ -71,3 +71,18 @@ func checkFlowLayer(flow *godpi.Flow, layerType gopacket.LayerType,
 	}
 	return false
 }
+
+// checkFirstPayload applies the check function to the payload of the first
+// packet that has the specified layer. It returns the result of that function
+// on that first packet, or false if no such packet exists.
+func checkFirstPayload(flow *godpi.Flow, layerType gopacket.LayerType,
+	checkFunc func(payload []byte) bool) bool {
+	for _, packet := range flow.Packets {
+		if layer := (*packet).Layer(layerType); layer != nil {
+			if payload := layer.LayerPayload(); payload != nil && len(payload) > 0 {
+				return checkFunc(payload)
+			}
+		}
+	}
+	return false
+}
