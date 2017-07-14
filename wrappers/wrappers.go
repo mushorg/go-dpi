@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/mushorg/go-dpi"
+	"os"
 )
 
 // Wrapper is implemented by every wrapper. It contains methods for
@@ -32,7 +33,8 @@ func InitializeWrappers() {
 		if err == nil {
 			activeWrappers = append(activeWrappers, wrapper)
 		} else {
-			fmt.Printf("Error initializing wrapper: %s: %s\n", wrapper.GetWrapperName(), err)
+			fmt.Fprintf(os.Stderr, "Error initializing wrapper: %s: %s\n",
+				wrapper.GetWrapperName(), err)
 		}
 	}
 }
