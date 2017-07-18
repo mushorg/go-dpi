@@ -12,19 +12,19 @@ import (
 
 // lpiCodeToProtocol maps the LPI protocol codes to go-dpi protocols.
 var lpiCodeToProtocol = map[uint32]godpi.Protocol{
-	0:   godpi.Http,     // LPI_PROTO_HTTP
-	14:  godpi.Dns,      // LPI_PROTO_DNS
-	201: godpi.Dns,      // LPI_PROTO_UDP_DNS
-	8:   godpi.Ssh,      // LPI_PROTO_SSH
-	23:  godpi.Rpc,      // LPI_PROTO_RPC_SCAN
-	1:   godpi.Smtp,     // LPI_PROTO_SMTP
-	92:  godpi.Smtp,     // LPI_PROTO_INVALID_SMTP
-	21:  godpi.Rdp,      // LPI_PROTO_RDP
-	24:  godpi.Smb,      // LPI_PROTO_SMB
-	380: godpi.Icmp,     // LPI_PROTO_ICMP
-	27:  godpi.Ftp,      // LPI_PROTO_FTP_CONTROL
-	12:  godpi.Ssl,      // LPI_PROTO_SSL
-	37:  godpi.Netbios,  // LPI_PROTO_NETBIOS
+	0:   godpi.HTTP,    // LPI_PROTO_HTTP
+	14:  godpi.DNS,     // LPI_PROTO_DNS
+	201: godpi.DNS,     // LPI_PROTO_UDP_DNS
+	8:   godpi.SSH,     // LPI_PROTO_SSH
+	23:  godpi.RPC,     // LPI_PROTO_RPC_SCAN
+	1:   godpi.SMTP,    // LPI_PROTO_SMTP
+	92:  godpi.SMTP,    // LPI_PROTO_INVALID_SMTP
+	21:  godpi.RDP,     // LPI_PROTO_RDP
+	24:  godpi.SMB,     // LPI_PROTO_SMB
+	380: godpi.ICMP,    // LPI_PROTO_ICMP
+	27:  godpi.FTP,     // LPI_PROTO_FTP_CONTROL
+	12:  godpi.SSL,     // LPI_PROTO_SSL
+	37:  godpi.NetBIOS, // LPI_PROTO_NETBIOS
 }
 
 // LPIWrapperName is the identification of the libprotoident library.

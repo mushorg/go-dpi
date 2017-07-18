@@ -29,5 +29,5 @@ func (classifier RPCClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 
 // GetProtocol returns the corresponding protocol
 func (classifier RPCClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Rpc
+	return godpi.RPC
 }

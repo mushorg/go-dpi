@@ -28,5 +28,5 @@ func (classifier SMTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 
 // GetProtocol returns the corresponding protocol
 func (classifier SMTPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Smtp
+	return godpi.SMTP
 }

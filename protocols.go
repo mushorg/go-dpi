@@ -5,16 +5,16 @@ package godpi
 type Protocol string
 
 const (
-	Http    Protocol = "HTTP"
-	Dns     Protocol = "DNS"
-	Ssh     Protocol = "SSH"
-	Rpc     Protocol = "RPC"
-	Smtp    Protocol = "SMTP"
-	Rdp     Protocol = "RDP"
-	Smb     Protocol = "SMB"
-	Icmp    Protocol = "ICMP"
-	Ftp     Protocol = "FTP"
-	Ssl     Protocol = "SSL"
-	Netbios Protocol = "NetBIOS"
+	HTTP    Protocol = "HTTP"
+	DNS     Protocol = "DNS"
+	SSH     Protocol = "SSH"
+	RPC     Protocol = "RPC"
+	SMTP    Protocol = "SMTP"
+	RDP     Protocol = "RDP"
+	SMB     Protocol = "SMB"
+	ICMP    Protocol = "ICMP"
+	FTP     Protocol = "FTP"
+	SSL     Protocol = "SSL"
+	NetBIOS Protocol = "NetBIOS"
 	Unknown Protocol = ""
 )

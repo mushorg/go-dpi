@@ -1,6 +1,7 @@
 package classifiers
 
 import (
+	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/mushorg/go-dpi"
 )
@@ -9,25 +10,25 @@ import (
 type DNSClassifier struct{}
 
 // HeuristicClassify for DNSClassifier
-func (classifier DNSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
-	if len(flow.Packets) == 0 {
-		return false
-	}
-	for _, packet := range flow.Packets {
-		if layer := (*packet).Layer(layers.LayerTypeUDP); layer != nil {
-			srcPort := layer.(*layers.UDP).SrcPort
-			dstPort := layer.(*layers.UDP).DstPort
-			if srcPort != 53 && dstPort != 53 {
-				return false
+func (_ DNSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+	return checkFlowLayer(flow, layers.LayerTypeUDP, func(layer gopacket.Layer) (detected bool) {
+		defer func() {
+			if recover() != nil {
+				// catch errors in the incorrect decoding of an irrelevant layer as DNS
+				detected = false
 			}
-		} else {
-			return false
-		}
-	}
-	return true
+		}()
+		layerParser := gopacket.DecodingLayerParser{}
+		dns := layers.DNS{}
+		err := dns.DecodeFromBytes(layer.LayerPayload(), &layerParser)
+		// attempt to decode layer as DNS packet using gopacket and return
+		// whether it was successful
+		detected = err == nil
+		return
+	})
 }
 
 // GetProtocol returns the corresponding protocol
 func (classifier DNSClassifier) GetProtocol() godpi.Protocol {
-	return godpi.Dns
+	return godpi.DNS
 }

@@ -2,7 +2,10 @@
 // and the helpers for applying them on a flow.
 package classifiers
 
-import "github.com/mushorg/go-dpi"
+import (
+	"github.com/google/gopacket"
+	"github.com/mushorg/go-dpi"
+)
 
 // GoDPIName is the name of the library, to be used as an identifier for the
 // source of a classification.
@@ -27,14 +30,14 @@ var classifierList = [...]GenericClassifier{
 	DNSClassifier{},
 	FTPClassifier{},
 	HTTPClassifier{},
-	IcmpClassifier{},
-	NetbiosClassifier{},
-	RdpClassifier{},
+	ICMPClassifier{},
+	NetBIOSClassifier{},
+	RDPClassifier{},
 	RPCClassifier{},
-	SmbClassifier{},
+	SMBClassifier{},
 	SMTPClassifier{},
 	SSHClassifier{},
-	SslClassifier{},
+	SSLClassifier{},
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
@@ -52,4 +55,34 @@ func ClassifyFlow(flow *godpi.Flow) (result godpi.Protocol, source godpi.Classif
 		}
 	}
 	return
+}
+
+// checkFlowLayer applies the check function to the specified layer of each
+// packet in a flow, where it is available. It returns whether there is a
+// packet in the flow for which the check function returns true.
+func checkFlowLayer(flow *godpi.Flow, layerType gopacket.LayerType,
+	checkFunc func(layer gopacket.Layer) bool) bool {
+	for _, packet := range flow.Packets {
+		if layer := (*packet).Layer(layerType); layer != nil {
+			if checkFunc(layer) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// checkFirstPayload applies the check function to the payload of the first
+// packet that has the specified layer. It returns the result of that function
+// on that first packet, or false if no such packet exists.
+func checkFirstPayload(flow *godpi.Flow, layerType gopacket.LayerType,
+	checkFunc func(payload []byte) bool) bool {
+	for _, packet := range flow.Packets {
+		if layer := (*packet).Layer(layerType); layer != nil {
+			if payload := layer.LayerPayload(); payload != nil && len(payload) > 0 {
+				return checkFunc(payload)
+			}
+		}
+	}
+	return false
 }
