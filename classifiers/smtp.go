@@ -3,7 +3,7 @@ package classifiers
 import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"strings"
 )
 
@@ -11,7 +11,7 @@ import (
 type SMTPClassifier struct{}
 
 // HeuristicClassify for SMTPClassifier
-func (classifier SMTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier SMTPClassifier) HeuristicClassify(flow *types.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -34,6 +34,6 @@ func (classifier SMTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier SMTPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.SMTP
+func (classifier SMTPClassifier) GetProtocol() types.Protocol {
+	return types.SMTP
 }

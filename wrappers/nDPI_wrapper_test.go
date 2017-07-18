@@ -4,7 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
+	"github.com/mushorg/go-dpi/utils"
 )
 
 func TestNewNDPIWrapper(t *testing.T) {
@@ -14,8 +15,8 @@ func TestNewNDPIWrapper(t *testing.T) {
 }
 
 func TestNDPIWrapperClassification(t *testing.T) {
-	flow := godpi.NewFlow()
-	packetChan, _ := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
+	flow := types.NewFlow()
+	packetChan, _ := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	for i := 0; i < 4; i++ {
 		packet := <-packetChan
 		flow.Packets = append(flow.Packets, &packet)
@@ -26,7 +27,7 @@ func TestNDPIWrapperClassification(t *testing.T) {
 	result, err := wrapper.ClassifyFlow(flow)
 	wrapper.DestroyWrapper()
 
-	if result != godpi.HTTP || err != nil {
+	if result != types.HTTP || err != nil {
 		t.Errorf("Incorrectly detected flow protocol: %s instead of HTTP", result)
 	}
 }
@@ -80,12 +81,12 @@ func TestNDPIWrapper_ClassifyFlowErrors(t *testing.T) {
 	}
 
 	// empty flow should be unknown
-	if ret, _ := wrapper.ClassifyFlow(godpi.NewFlow()); ret != godpi.Unknown {
+	if ret, _ := wrapper.ClassifyFlow(types.NewFlow()); ret != types.Unknown {
 		t.Errorf("Incorrectly classified empty flow: %s instead of unknown", ret)
 	}
 
-	flow := godpi.NewFlow()
-	packetChan, _ := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
+	flow := types.NewFlow()
+	packetChan, _ := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	packet := <-packetChan
 	flow.Packets = append(flow.Packets, &packet)
 

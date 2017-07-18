@@ -2,14 +2,14 @@ package classifiers
 
 import (
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 )
 
 // NetBIOSClassifier struct
 type NetBIOSClassifier struct{}
 
 // HeuristicClassify for NetBIOSClassifier
-func (classifier NetBIOSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier NetBIOSClassifier) HeuristicClassify(flow *types.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -34,6 +34,6 @@ func (classifier NetBIOSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier NetBIOSClassifier) GetProtocol() godpi.Protocol {
-	return godpi.NetBIOS
+func (classifier NetBIOSClassifier) GetProtocol() types.Protocol {
+	return types.NetBIOS
 }

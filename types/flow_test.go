@@ -1,10 +1,11 @@
-package godpi
+package types
 
 import (
 	"testing"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+	"github.com/mushorg/go-dpi/utils"
 )
 
 func TestNewFlow(t *testing.T) {
@@ -24,7 +25,7 @@ func TestCreateFlowFromPacket(t *testing.T) {
 
 func TestGetFlowForPacket(t *testing.T) {
 	flows := make([]*Flow, 0)
-	dumpPackets, err := ReadDumpFile("godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +37,7 @@ func TestGetFlowForPacket(t *testing.T) {
 		}
 	}
 	if count := len(flows); count != 3 {
-		t.Fatal("Wrong number of flows detected: %d instead of 3", count)
+		t.Fatalf("Wrong number of flows detected: %d instead of 3", count)
 	}
 	packetCounts := [3]int{34, 2, 7}
 	for flowIdx, expectedCount := range packetCounts {
@@ -49,7 +50,7 @@ func TestGetFlowForPacket(t *testing.T) {
 func TestFlushTrackedFlows(t *testing.T) {
 	// make sure there are no flows left from other tests
 	FlushTrackedFlows()
-	dumpPackets, err := ReadDumpFile("godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}

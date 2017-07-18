@@ -7,24 +7,24 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"github.com/pkg/errors"
 )
 
 // ndpiCodeToProtocol maps the nDPI protocol codes to go-dpi protocols.
-var ndpiCodeToProtocol = map[uint32]godpi.Protocol{
-	7:   godpi.HTTP,    // NDPI_PROTOCOL_HTTP
-	5:   godpi.DNS,     // NDPI_PROTOCOL_DNS
-	92:  godpi.SSH,     // NDPI_PROTOCOL_SSH
-	127: godpi.RPC,     // NDPI_PROTOCOL_DCERPC
-	3:   godpi.SMTP,    // NDPI_PROTOCOL_MAIL_SMTP
-	88:  godpi.RDP,     // NDPI_PROTOCOL_RDP
-	16:  godpi.SMB,     // NDPI_PROTOCOL_SMB
-	81:  godpi.ICMP,    // NDPI_PROTOCOL_IP_ICMP
-	1:   godpi.FTP,     // NDPI_PROTOCOL_FTP_CONTROL
-	91:  godpi.SSL,     // NDPI_PROTOCOL_SSL
-	64:  godpi.SSL,     // NDPI_PROTOCOL_SSL_NO_CERT
-	10:  godpi.NetBIOS, // NDPI_PROTOCOL_NETBIOS
+var ndpiCodeToProtocol = map[uint32]types.Protocol{
+	7:   types.HTTP,    // NDPI_PROTOCOL_HTTP
+	5:   types.DNS,     // NDPI_PROTOCOL_DNS
+	92:  types.SSH,     // NDPI_PROTOCOL_SSH
+	127: types.RPC,     // NDPI_PROTOCOL_DCERPC
+	3:   types.SMTP,    // NDPI_PROTOCOL_MAIL_SMTP
+	88:  types.RDP,     // NDPI_PROTOCOL_RDP
+	16:  types.SMB,     // NDPI_PROTOCOL_SMB
+	81:  types.ICMP,    // NDPI_PROTOCOL_IP_ICMP
+	1:   types.FTP,     // NDPI_PROTOCOL_FTP_CONTROL
+	91:  types.SSL,     // NDPI_PROTOCOL_SSL
+	64:  types.SSL,     // NDPI_PROTOCOL_SSL_NO_CERT
+	10:  types.NetBIOS, // NDPI_PROTOCOL_NETBIOS
 }
 
 // NDPIWrapperName is the identification of the nDPI library.
@@ -80,7 +80,7 @@ func (wrapper *NDPIWrapper) DestroyWrapper() error {
 
 // ClassifyFlow classifies a flow using the nDPI library. It returns the
 // detected protocol and any error.
-func (wrapper *NDPIWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, error) {
+func (wrapper *NDPIWrapper) ClassifyFlow(flow *types.Flow) (types.Protocol, error) {
 	for _, ppacket := range flow.Packets {
 		packet := *ppacket
 		seconds := packet.Metadata().Timestamp.Second()
@@ -93,21 +93,21 @@ func (wrapper *NDPIWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, erro
 		} else if ndpiProto < 0 {
 			switch ndpiProto {
 			case -10:
-				return godpi.Unknown, errors.New("nDPI wrapper does not support IPv6")
+				return types.Unknown, errors.New("nDPI wrapper does not support IPv6")
 			case -11:
-				return godpi.Unknown, errors.New("Received fragmented packet")
+				return types.Unknown, errors.New("Received fragmented packet")
 			case -12:
-				return godpi.Unknown, errors.New("Error creating nDPI flow")
+				return types.Unknown, errors.New("Error creating nDPI flow")
 			default:
-				return godpi.Unknown, errors.New("nDPI unknown error")
+				return types.Unknown, errors.New("nDPI unknown error")
 			}
 		}
 	}
-	return godpi.Unknown, nil
+	return types.Unknown, nil
 }
 
 // GetWrapperName returns the name of the wrapper, in order to identify which
 // wrapper provided a classification.
-func (wrapper *NDPIWrapper) GetWrapperName() godpi.ClassificationSource {
+func (wrapper *NDPIWrapper) GetWrapperName() types.ClassificationSource {
 	return NDPIWrapperName
 }

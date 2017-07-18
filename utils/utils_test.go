@@ -1,4 +1,4 @@
-package godpi
+package utils
 
 import (
 	"github.com/google/gopacket/layers"
@@ -7,7 +7,7 @@ import (
 
 func TestReadDumpFile(t *testing.T) {
 	var count int
-	packets, err := ReadDumpFile("godpi_example/dumps/http.cap")
+	packets, err := ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}

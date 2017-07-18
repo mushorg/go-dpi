@@ -11,7 +11,7 @@ WORKDIR $GOPATH/src/github.com/mushorg/go-dpi
 ADD . .
 RUN glide install && \
     glide update && \
-    go test . ./classifiers ./wrappers && \
+    echo $GO_DIRS | xargs go test && \
     go install ./godpi_example
 
 ENTRYPOINT ["godpi_example"]

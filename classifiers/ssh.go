@@ -3,7 +3,7 @@ package classifiers
 import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"strings"
 )
 
@@ -11,7 +11,7 @@ import (
 type SSHClassifier struct{}
 
 // HeuristicClassify for SSHClassifier
-func (_ SSHClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier SSHClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
 		func(payload []byte, _ []*gopacket.Packet) bool {
 			payloadStr := string(payload)
@@ -22,6 +22,6 @@ func (_ SSHClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier SSHClassifier) GetProtocol() godpi.Protocol {
-	return godpi.SSH
+func (classifier SSHClassifier) GetProtocol() types.Protocol {
+	return types.SSH
 }

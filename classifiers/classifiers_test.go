@@ -5,12 +5,13 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
+	"github.com/mushorg/go-dpi/utils"
 	"strings"
 )
 
 func TestClassifyFlow(t *testing.T) {
-	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,9 +19,9 @@ func TestClassifyFlow(t *testing.T) {
 		<-dumpPackets
 	}
 	packet := <-dumpPackets
-	flow := godpi.CreateFlowFromPacket(&packet)
+	flow := types.CreateFlowFromPacket(&packet)
 	protocol, source := ClassifyFlow(flow)
-	if protocol != godpi.HTTP || flow.DetectedProtocol != godpi.HTTP {
+	if protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
 		t.Error("Wrong protocol detected:", protocol)
 	}
 	if name := flow.ClassificationSource; name != GoDPIName || source != GoDPIName {
@@ -29,19 +30,19 @@ func TestClassifyFlow(t *testing.T) {
 }
 
 func TestClassifyFlowEmpty(t *testing.T) {
-	flow := godpi.NewFlow()
+	flow := types.NewFlow()
 	protocol, source := ClassifyFlow(flow)
-	if protocol != godpi.Unknown || source != godpi.NoSource {
+	if protocol != types.Unknown || source != types.NoSource {
 		t.Error("Protocol incorrectly detected:", protocol)
 	}
 }
 
 func TestCheckFlowLayer(t *testing.T) {
-	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
-	flow := godpi.NewFlow()
+	flow := types.NewFlow()
 	for packet := range dumpPackets {
 		packetCopy := packet
 		flow.AddPacket(&packetCopy)
@@ -68,11 +69,11 @@ func TestCheckFlowLayer(t *testing.T) {
 }
 
 func TestCheckFirstPayload(t *testing.T) {
-	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
-	flow := godpi.NewFlow()
+	flow := types.NewFlow()
 	for packet := range dumpPackets {
 		packetCopy := packet
 		flow.AddPacket(&packetCopy)
@@ -101,15 +102,15 @@ func TestCheckFirstPayload(t *testing.T) {
 	}
 }
 
-func getPcapDumpProtoMap(filename string) (result map[godpi.Protocol]int) {
-	result = make(map[godpi.Protocol]int)
-	packets, err := godpi.ReadDumpFile(filename)
+func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
+	result = make(map[types.Protocol]int)
+	packets, err := utils.ReadDumpFile(filename)
 	if err != nil {
 		return
 	}
 	for packet := range packets {
-		flow, _ := godpi.GetFlowForPacket(&packet)
-		if flow.DetectedProtocol == godpi.Unknown {
+		flow, _ := types.GetFlowForPacket(&packet)
+		if flow.DetectedProtocol == types.Unknown {
 			res, _ := ClassifyFlow(flow)
 			result[res]++
 		}
@@ -118,7 +119,7 @@ func getPcapDumpProtoMap(filename string) (result map[godpi.Protocol]int) {
 }
 
 type protocolTestInfo struct {
-	protocol godpi.Protocol
+	protocol types.Protocol
 	filename string
 	count    int
 }
@@ -126,14 +127,14 @@ type protocolTestInfo struct {
 func TestClassifiers(t *testing.T) {
 	// test for each protocol the expected number of flows in the appropriate capture file
 	protocolInfos := []protocolTestInfo{
-		{godpi.HTTP, "../godpi_example/dumps/http.cap", 2},
-		{godpi.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 5},
-		{godpi.ICMP, "../godpi_example/dumps/dns+icmp.pcapng", 22},
-		{godpi.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
-		{godpi.SSL, "../godpi_example/dumps/https.cap", 1},
-		{godpi.SSH, "../godpi_example/dumps/ssh.pcap", 1},
-		{godpi.SMTP, "../godpi_example/dumps/smtp.pcap", 1},
-		{godpi.FTP, "../godpi_example/dumps/ftp.pcap", 1},
+		{types.HTTP, "../godpi_example/dumps/http.cap", 2},
+		{types.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 5},
+		{types.ICMP, "../godpi_example/dumps/dns+icmp.pcapng", 22},
+		{types.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
+		{types.SSL, "../godpi_example/dumps/https.cap", 1},
+		{types.SSH, "../godpi_example/dumps/ssh.pcap", 1},
+		{types.SMTP, "../godpi_example/dumps/smtp.pcap", 1},
+		{types.FTP, "../godpi_example/dumps/ftp.pcap", 1},
 	}
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]
