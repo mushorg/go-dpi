@@ -17,7 +17,54 @@ func TestNewFlow(t *testing.T) {
 func TestCreateFlowFromPacket(t *testing.T) {
 	packet := gopacket.NewPacket([]byte{}, layers.LayerTypeEthernet, gopacket.DecodeOptions{})
 	flow := CreateFlowFromPacket(&packet)
-	if len(flow.Packets) != 1 || flow.Packets[0] != &packet {
+	if len(flow.Packets) != 1 || *flow.Packets[0] != packet {
 		t.Error("Flow doesn't have only the given packet")
+	}
+}
+
+func TestGetFlowForPacket(t *testing.T) {
+	flows := make([]*Flow, 0)
+	dumpPackets, err := ReadDumpFile("godpi_example/dumps/http.cap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for packet := range dumpPackets {
+		packetCopy := packet
+		detectedFlow, isNew := GetFlowForPacket(&packetCopy)
+		if isNew {
+			flows = append(flows, detectedFlow)
+		}
+	}
+	if count := len(flows); count != 3 {
+		t.Fatal("Wrong number of flows detected: %d instead of 3", count)
+	}
+	packetCounts := [3]int{34, 2, 7}
+	for flowIdx, expectedCount := range packetCounts {
+		if count := len(flows[flowIdx].Packets); count != expectedCount {
+			t.Errorf("Wrong number of packets in flow: %d instead of %d", count, expectedCount)
+		}
+	}
+}
+
+func TestFlushTrackedFlows(t *testing.T) {
+	// make sure there are no flows left from other tests
+	FlushTrackedFlows()
+	dumpPackets, err := ReadDumpFile("godpi_example/dumps/http.cap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	packet := <-dumpPackets
+	_, isNew := GetFlowForPacket(&packet)
+	if !isNew {
+		t.Error("Detected existing flow for first packet in flow")
+	}
+	_, isNew = GetFlowForPacket(&packet)
+	if isNew {
+		t.Error("Didn't detect existing flow for second packet in flow")
+	}
+	FlushTrackedFlows()
+	_, isNew = GetFlowForPacket(&packet)
+	if !isNew {
+		t.Error("Detected existing flow for first packet after flush")
 	}
 }
