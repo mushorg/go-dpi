@@ -12,7 +12,7 @@ import (
 func TestClassifyFlow(t *testing.T) {
 	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	for i := 0; i < 3; i++ {
 		<-dumpPackets
@@ -39,7 +39,7 @@ func TestClassifyFlowEmpty(t *testing.T) {
 func TestCheckFlowLayer(t *testing.T) {
 	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	flow := godpi.NewFlow()
 	for packet := range dumpPackets {
@@ -70,7 +70,7 @@ func TestCheckFlowLayer(t *testing.T) {
 func TestCheckFirstPayload(t *testing.T) {
 	dumpPackets, err := godpi.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	flow := godpi.NewFlow()
 	for packet := range dumpPackets {
@@ -104,9 +104,11 @@ func getPcapDumpProtoMap(filename string) (result map[godpi.Protocol]int) {
 		return
 	}
 	for packet := range packets {
-		flow := godpi.CreateFlowFromPacket(&packet)
-		res, _ := ClassifyFlow(flow)
-		result[res]++
+		flow, _ := godpi.GetFlowForPacket(&packet)
+		if flow.DetectedProtocol == godpi.Unknown {
+			res, _ := ClassifyFlow(flow)
+			result[res]++
+		}
 	}
 	return
 }
@@ -118,14 +120,14 @@ type protocolTestInfo struct {
 }
 
 func TestClassifiers(t *testing.T) {
-	// test for each protocol the expected number of packets in the appropriate capture file
+	// test for each protocol the expected number of flows in the appropriate capture file
 	protocolInfos := []protocolTestInfo{
 		{godpi.HTTP, "../godpi_example/dumps/http.cap", 2},
-		{godpi.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 11},
+		{godpi.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 5},
 		{godpi.ICMP, "../godpi_example/dumps/dns+icmp.pcapng", 22},
 		{godpi.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
 		{godpi.SSL, "../godpi_example/dumps/https.cap", 1},
-		{godpi.SSH, "../godpi_example/dumps/ssh.pcap", 2},
+		{godpi.SSH, "../godpi_example/dumps/ssh.pcap", 1},
 	}
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]

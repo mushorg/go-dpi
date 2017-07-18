@@ -9,7 +9,7 @@ func TestReadDumpFile(t *testing.T) {
 	var count int
 	packets, err := ReadDumpFile("godpi_example/dumps/http.cap")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	packet := <-packets
 	tcpLayer := packet.Layer(layers.LayerTypeTCP).(*layers.TCP)
