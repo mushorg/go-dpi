@@ -79,16 +79,20 @@ func TestCheckFirstPayload(t *testing.T) {
 	}
 
 	called := false
-	noDetections := checkFirstPayload(flow, layers.LayerTypeTCP, func(payload []byte) bool {
-		called = true
-		if payload == nil || len(payload) == 0 {
-			t.Error("No payload passed to callback")
-		}
-		if !strings.HasPrefix(string(payload), "GET /download.html") {
-			t.Error("Wrong first payload passed to callback")
-		}
-		return false
-	})
+	noDetections := checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+			called = true
+			if payload == nil || len(payload) == 0 {
+				t.Error("No payload passed to callback")
+			}
+			if !strings.HasPrefix(string(payload), "GET /download.html") {
+				t.Error("Wrong first payload passed to callback")
+			}
+			if len(packetsRest) != 39 {
+				t.Error(len(packetsRest))
+			}
+			return false
+		})
 	if noDetections {
 		t.Error("Detection returned true when callback returned false")
 	}
@@ -128,6 +132,8 @@ func TestClassifiers(t *testing.T) {
 		{godpi.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
 		{godpi.SSL, "../godpi_example/dumps/https.cap", 1},
 		{godpi.SSH, "../godpi_example/dumps/ssh.pcap", 1},
+		{godpi.SMTP, "../godpi_example/dumps/smtp.pcap", 1},
+		{godpi.FTP, "../godpi_example/dumps/ftp.pcap", 1},
 	}
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]

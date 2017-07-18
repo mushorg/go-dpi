@@ -1,8 +1,10 @@
 package classifiers
 
 import (
+	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/mushorg/go-dpi"
+	"strings"
 )
 
 // FTPClassifier struct
@@ -13,18 +15,21 @@ func (classifier FTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
-	for _, packet := range flow.Packets {
-		if layer := (*packet).Layer(layers.LayerTypeTCP); layer != nil {
-			srcPort := layer.(*layers.TCP).SrcPort
-			dstPort := layer.(*layers.TCP).DstPort
-			if srcPort != 21 && dstPort != 21 {
-				return false
+	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+			payloadStr := string(payload)
+			for _, line := range strings.Split(payloadStr, "\n") {
+				if len(line) > 0 && !strings.HasPrefix(line, "220") {
+					return false
+				}
 			}
-		} else {
-			return false
-		}
-	}
-	return true
+			return checkFirstPayload(packetsRest, layers.LayerTypeTCP,
+				func(payload []byte, _ []*gopacket.Packet) bool {
+					payloadStr := string(payload)
+					return strings.HasPrefix(payloadStr, "USER ") &&
+						strings.HasSuffix(payloadStr, "\n")
+				})
+		})
 }
 
 // GetProtocol returns the corresponding protocol
