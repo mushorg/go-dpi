@@ -1,6 +1,11 @@
 #ifndef NDPI_WRAPPER_ONCE
 #define NDPI_WRAPPER_ONCE
 
+#include <pcap.h>
+
+#include "wrappers_config.h"
+#ifndef DISABLE_NDPI
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,7 +13,6 @@
 #include <stdarg.h>
 #include <netinet/in.h>
 #include <search.h>
-#include <pcap.h>
 #include <signal.h>
 
 #include "nDPI_wrapper_impl.h"
@@ -247,7 +251,7 @@ static int packet_processing(const u_int64_t time, const struct pcap_pkthdr *hea
 
 
 // process a new packet
-extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char * packet)
+extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char *packet)
 {
   const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
   struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[sizeof(struct ndpi_ethhdr)];
@@ -274,4 +278,20 @@ extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char * pa
     return packet_processing(time, header, iph, header->len - ip_offset, header->len);
   }
 }
+
+#else
+// nDPI is disabled, so initialization fails
+
+extern int ndpiInitialize() {
+    return ERROR_LIBRARY_DISABLED;
+}
+
+extern void ndpiDestroy(void) {
+}
+
+extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char *packet) {
+    return -1;
+}
+
+#endif
 #endif

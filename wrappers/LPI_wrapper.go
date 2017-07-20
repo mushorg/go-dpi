@@ -1,7 +1,10 @@
 package wrappers
 
+// #include "wrappers_config.h"
+// #ifndef DISABLE_LPI
 // #cgo CXXFLAGS: -std=c++11
-// #cgo LDFLAGS: -lprotoident -ltrace
+// #cgo LDFLAGS: -L/usr/lib -L/usr/local/lib -L${SRCDIR} -Wl,-Bdynamic -lprotoident -ltrace
+// #endif
 // #include "LPI_wrapper_impl.hpp"
 import "C"
 import (
@@ -40,9 +43,8 @@ func NewLPIWrapper() *LPIWrapper {
 }
 
 // InitializeWrapper initializes the libprotoident wrapper.
-func (wrapper *LPIWrapper) InitializeWrapper() error {
-	C.lpiInitLibrary()
-	return nil
+func (wrapper *LPIWrapper) InitializeWrapper() int {
+	return int(C.lpiInitLibrary())
 }
 
 // DestroyWrapper destroys the libprotoident wrapper.
