@@ -3,7 +3,7 @@ package classifiers
 import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"regexp"
 	"strings"
 )
@@ -32,7 +32,7 @@ func init() {
 }
 
 // HeuristicClassify for HTTPClassifier
-func (_ HTTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier HTTPClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFlowLayer(flow, layers.LayerTypeTCP, func(layer gopacket.Layer) bool {
 		payload := layer.LayerPayload()
 		return regex.Match(payload)
@@ -40,6 +40,6 @@ func (_ HTTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier HTTPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.HTTP
+func (classifier HTTPClassifier) GetProtocol() types.Protocol {
+	return types.HTTP
 }

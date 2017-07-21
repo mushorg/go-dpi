@@ -5,7 +5,7 @@ package wrappers
 import (
 	"fmt"
 
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"os"
 )
 
@@ -14,8 +14,8 @@ import (
 type Wrapper interface {
 	InitializeWrapper() error
 	DestroyWrapper() error
-	ClassifyFlow(*godpi.Flow) (godpi.Protocol, error)
-	GetWrapperName() godpi.ClassificationSource
+	ClassifyFlow(*types.Flow) (types.Protocol, error)
+	GetWrapperName() types.ClassificationSource
 }
 
 var wrapperList = []Wrapper{
@@ -48,9 +48,9 @@ func DestroyWrappers() {
 
 // ClassifyFlow applies all the wrappers to a flow and returns the protocol
 // that is detected by a wrapper if there is one. Otherwise, it returns nil.
-func ClassifyFlow(flow *godpi.Flow) (result godpi.Protocol, source godpi.ClassificationSource) {
+func ClassifyFlow(flow *types.Flow) (result types.Protocol, source types.ClassificationSource) {
 	for _, wrapper := range activeWrappers {
-		if proto, err := wrapper.ClassifyFlow(flow); proto != godpi.Unknown && err == nil {
+		if proto, err := wrapper.ClassifyFlow(flow); proto != types.Unknown && err == nil {
 			result = proto
 			source = wrapper.GetWrapperName()
 			flow.DetectedProtocol = proto

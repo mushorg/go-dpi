@@ -1,8 +1,9 @@
-package godpi
+// Package types contains the basic types used by the library.
+package types
 
 import "github.com/google/gopacket"
 
-var flowTracker map[gopacket.Flow]*Flow = make(map[gopacket.Flow]*Flow)
+var flowTracker = make(map[gopacket.Flow]*Flow)
 
 // ClassificationSource is the module of the library that is responsible for
 // the classification of a flow.

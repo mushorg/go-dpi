@@ -3,7 +3,7 @@ package classifiers
 import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"strings"
 )
 
@@ -11,7 +11,7 @@ import (
 type FTPClassifier struct{}
 
 // HeuristicClassify for FTPClassifier
-func (classifier FTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier FTPClassifier) HeuristicClassify(flow *types.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -33,6 +33,6 @@ func (classifier FTPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier FTPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.FTP
+func (classifier FTPClassifier) GetProtocol() types.Protocol {
+	return types.FTP
 }

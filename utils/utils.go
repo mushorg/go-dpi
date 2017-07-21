@@ -1,4 +1,5 @@
-package godpi
+// Package utils provides some useful utility functions to the library.
+package utils
 
 import (
 	"github.com/google/gopacket"

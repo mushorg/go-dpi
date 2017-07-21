@@ -1,9 +1,9 @@
-// Package godpi contains the basic types and methods that the library provides.
-package godpi
+package types
 
 // Protocol is the type of each of the detected protocols.
 type Protocol string
 
+// Protocol identifiers for the supported protocols
 const (
 	HTTP    Protocol = "HTTP"
 	DNS     Protocol = "DNS"

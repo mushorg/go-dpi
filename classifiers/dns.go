@@ -3,14 +3,14 @@ package classifiers
 import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 )
 
 // DNSClassifier struct
 type DNSClassifier struct{}
 
 // HeuristicClassify for DNSClassifier
-func (_ DNSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier DNSClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFlowLayer(flow, layers.LayerTypeUDP, func(layer gopacket.Layer) (detected bool) {
 		defer func() {
 			if recover() != nil {
@@ -29,6 +29,6 @@ func (_ DNSClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier DNSClassifier) GetProtocol() godpi.Protocol {
-	return godpi.DNS
+func (classifier DNSClassifier) GetProtocol() types.Protocol {
+	return types.DNS
 }

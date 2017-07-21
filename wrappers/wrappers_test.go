@@ -3,7 +3,7 @@ package wrappers
 import (
 	"testing"
 
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 	"github.com/pkg/errors"
 )
 
@@ -27,17 +27,17 @@ func (wrapper *MockWrapper) DestroyWrapper() error {
 	return nil
 }
 
-func (wrapper *MockWrapper) ClassifyFlow(flow *godpi.Flow) (godpi.Protocol, error) {
+func (wrapper *MockWrapper) ClassifyFlow(flow *types.Flow) (types.Protocol, error) {
 	wrapper.classifyCalled = true
-	return godpi.HTTP, nil
+	return types.HTTP, nil
 }
 
-func (wrapper *MockWrapper) GetWrapperName() godpi.ClassificationSource {
+func (wrapper *MockWrapper) GetWrapperName() types.ClassificationSource {
 	return "mock"
 }
 
 func TestClassifyFlowUninitialized(t *testing.T) {
-	flow := godpi.NewFlow()
+	flow := types.NewFlow()
 	uninitialized := &MockWrapper{initializeSuccessfully: false}
 	wrapperList = []Wrapper{
 		uninitialized,
@@ -50,10 +50,10 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 	if uninitialized.classifyCalled {
 		t.Error("Classify called on uninitialized wrapper")
 	}
-	if result != godpi.Unknown {
+	if result != types.Unknown {
 		t.Error("Empty classify did not return unknown")
 	}
-	if source != godpi.NoSource {
+	if source != types.NoSource {
 		t.Error("Empty classify incorrectly returned source")
 	}
 	DestroyWrappers()
@@ -63,7 +63,7 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 }
 
 func TestClassifyFlowInitialized(t *testing.T) {
-	flow := godpi.NewFlow()
+	flow := types.NewFlow()
 	initialized := &MockWrapper{initializeSuccessfully: true}
 	wrapperList = []Wrapper{
 		initialized,
@@ -76,7 +76,7 @@ func TestClassifyFlowInitialized(t *testing.T) {
 	if !initialized.classifyCalled {
 		t.Error("Classify not called on active wrapper")
 	}
-	if result != godpi.HTTP || flow.DetectedProtocol != godpi.HTTP {
+	if result != types.HTTP || flow.DetectedProtocol != types.HTTP {
 		t.Error("Classify did not return correct result")
 	}
 	if source != "mock" || flow.ClassificationSource != "mock" {

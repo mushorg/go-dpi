@@ -9,22 +9,23 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
-	"github.com/mushorg/go-dpi"
 	"github.com/mushorg/go-dpi/classifiers"
+	"github.com/mushorg/go-dpi/types"
+	"github.com/mushorg/go-dpi/utils"
 	"github.com/mushorg/go-dpi/wrappers"
 )
 
 func main() {
 	var (
 		count, idCount int
-		protoCounts    map[godpi.Protocol]int
+		protoCounts    map[types.Protocol]int
 		packetChannel  <-chan gopacket.Packet
-		flow           *godpi.Flow
-		protocol       godpi.Protocol
+		flow           *types.Flow
+		protocol       types.Protocol
 		err            error
 	)
 
-	protoCounts = make(map[godpi.Protocol]int)
+	protoCounts = make(map[types.Protocol]int)
 	filename := flag.String("filename", "godpi_example/dumps/http.cap", "File to read packets from")
 	device := flag.String("device", "", "Device to watch for packets")
 
@@ -40,7 +41,7 @@ func main() {
 		packetChannel = gopacket.NewPacketSource(handle, handle.LinkType()).Packets()
 	} else if _, ferr := os.Stat(*filename); !os.IsNotExist(ferr) {
 		// check if file exists
-		packetChannel, err = godpi.ReadDumpFile(*filename)
+		packetChannel, err = utils.ReadDumpFile(*filename)
 	} else {
 		fmt.Println("File does not exist:", *filename)
 		return
@@ -67,9 +68,9 @@ func main() {
 	count = 0
 	for packet := range packetChannel {
 		fmt.Printf("Packet %d: ", count+1)
-		flow = godpi.CreateFlowFromPacket(&packet)
+		flow = types.CreateFlowFromPacket(&packet)
 		protocol, _ = classifiers.ClassifyFlow(flow)
-		if protocol != godpi.Unknown {
+		if protocol != types.Unknown {
 			fmt.Printf("Identified as %s\n", protocol)
 			idCount++
 			protoCounts[protocol]++
@@ -78,9 +79,9 @@ func main() {
 		}
 
 		wrapperProtocol, source := wrappers.ClassifyFlow(flow)
-		if wrapperProtocol != godpi.Unknown {
+		if wrapperProtocol != types.Unknown {
 			fmt.Printf("%s says %s\n", source, wrapperProtocol)
-			if protocol == godpi.Unknown {
+			if protocol == types.Unknown {
 				idCount++
 				protoCounts[wrapperProtocol]++
 			} else if protocol != wrapperProtocol {

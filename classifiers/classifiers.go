@@ -4,7 +4,7 @@ package classifiers
 
 import (
 	"github.com/google/gopacket"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 )
 
 // GoDPIName is the name of the library, to be used as an identifier for the
@@ -15,7 +15,7 @@ const GoDPIName = "go-dpi"
 // that returns the classifier's detected protocol.
 type GenericClassifier interface {
 	// GetProtocol returns the protocol this classifier can detect.
-	GetProtocol() godpi.Protocol
+	GetProtocol() types.Protocol
 }
 
 // HeuristicClassifier is implemented by the classifiers that have heuristic
@@ -23,7 +23,7 @@ type GenericClassifier interface {
 type HeuristicClassifier interface {
 	// HeuristicClassify returns whether this classifier can identify the flow
 	// using heuristics.
-	HeuristicClassify(*godpi.Flow) bool
+	HeuristicClassify(*types.Flow) bool
 }
 
 var classifierList = [...]GenericClassifier{
@@ -42,7 +42,7 @@ var classifierList = [...]GenericClassifier{
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
 // that is detected by a classifier if there is one. Otherwise, it returns nil.
-func ClassifyFlow(flow *godpi.Flow) (result godpi.Protocol, source godpi.ClassificationSource) {
+func ClassifyFlow(flow *types.Flow) (result types.Protocol, source types.ClassificationSource) {
 	for _, classifier := range classifierList {
 		if heuristic, ok := classifier.(HeuristicClassifier); ok {
 			if heuristic.HeuristicClassify(flow) {
@@ -60,7 +60,7 @@ func ClassifyFlow(flow *godpi.Flow) (result godpi.Protocol, source godpi.Classif
 // checkFlowLayer applies the check function to the specified layer of each
 // packet in a flow, where it is available. It returns whether there is a
 // packet in the flow for which the check function returns true.
-func checkFlowLayer(flow *godpi.Flow, layerType gopacket.LayerType,
+func checkFlowLayer(flow *types.Flow, layerType gopacket.LayerType,
 	checkFunc func(layer gopacket.Layer) bool) bool {
 	for _, packet := range flow.Packets {
 		if layer := (*packet).Layer(layerType); layer != nil {

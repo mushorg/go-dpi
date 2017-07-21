@@ -2,14 +2,14 @@ package classifiers
 
 import (
 	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
 )
 
 // RDPClassifier struct
 type RDPClassifier struct{}
 
 // HeuristicClassify for RDPClassifier
-func (classifier RDPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
+func (classifier RDPClassifier) HeuristicClassify(flow *types.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
@@ -34,6 +34,6 @@ func (classifier RDPClassifier) HeuristicClassify(flow *godpi.Flow) bool {
 }
 
 // GetProtocol returns the corresponding protocol
-func (classifier RDPClassifier) GetProtocol() godpi.Protocol {
-	return godpi.RDP
+func (classifier RDPClassifier) GetProtocol() types.Protocol {
+	return types.RDP
 }
