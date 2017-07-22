@@ -3,9 +3,9 @@ package godpi
 
 import (
 	"github.com/google/gopacket"
-	"github.com/mushorg/go-dpi/classifiers"
+	"github.com/mushorg/go-dpi/modules/classifiers"
+	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
-	"github.com/mushorg/go-dpi/wrappers"
 )
 
 // Module is implemented by every classification module provided by the

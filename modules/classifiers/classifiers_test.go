@@ -12,7 +12,7 @@ import (
 
 func TestClassifyFlow(t *testing.T) {
 	module := NewClassifierModule()
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestClassifyFlowEmpty(t *testing.T) {
 }
 
 func TestCheckFlowLayer(t *testing.T) {
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestCheckFlowLayer(t *testing.T) {
 }
 
 func TestCheckFirstPayload(t *testing.T) {
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,14 +130,14 @@ type protocolTestInfo struct {
 func TestClassifiers(t *testing.T) {
 	// test for each protocol the expected number of flows in the appropriate capture file
 	protocolInfos := []protocolTestInfo{
-		{types.HTTP, "../godpi_example/dumps/http.cap", 2},
-		{types.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 5},
-		{types.ICMP, "../godpi_example/dumps/dns+icmp.pcapng", 22},
-		{types.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
-		{types.SSL, "../godpi_example/dumps/https.cap", 1},
-		{types.SSH, "../godpi_example/dumps/ssh.pcap", 1},
-		{types.SMTP, "../godpi_example/dumps/smtp.pcap", 1},
-		{types.FTP, "../godpi_example/dumps/ftp.pcap", 1},
+		{types.HTTP, "../../godpi_example/dumps/http.cap", 2},
+		{types.DNS, "../../godpi_example/dumps/dns+icmp.pcapng", 5},
+		{types.ICMP, "../../godpi_example/dumps/dns+icmp.pcapng", 22},
+		{types.ICMP, "../../godpi_example/dumps/icmpv6.pcap", 49},
+		{types.SSL, "../../godpi_example/dumps/https.cap", 1},
+		{types.SSH, "../../godpi_example/dumps/ssh.pcap", 1},
+		{types.SMTP, "../../godpi_example/dumps/smtp.pcap", 1},
+		{types.FTP, "../../godpi_example/dumps/ftp.pcap", 1},
 	}
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]
@@ -150,7 +150,7 @@ func TestClassifiers(t *testing.T) {
 
 func TestConfigureModule(t *testing.T) {
 	module := NewClassifierModule()
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}

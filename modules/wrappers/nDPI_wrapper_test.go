@@ -16,7 +16,7 @@ func TestNewNDPIWrapper(t *testing.T) {
 
 func TestNDPIWrapperClassification(t *testing.T) {
 	flow := types.NewFlow()
-	packetChan, _ := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	packetChan, _ := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	for i := 0; i < 4; i++ {
 		packet := <-packetChan
 		flow.Packets = append(flow.Packets, &packet)
@@ -86,7 +86,7 @@ func TestNDPIWrapper_ClassifyFlowErrors(t *testing.T) {
 	}
 
 	flow := types.NewFlow()
-	packetChan, _ := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	packetChan, _ := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	packet := <-packetChan
 	flow.Packets = append(flow.Packets, &packet)
 
