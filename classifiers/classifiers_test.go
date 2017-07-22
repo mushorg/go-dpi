@@ -11,6 +11,7 @@ import (
 )
 
 func TestClassifyFlow(t *testing.T) {
+	module := NewClassifierModule()
 	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
@@ -20,7 +21,7 @@ func TestClassifyFlow(t *testing.T) {
 	}
 	packet := <-dumpPackets
 	flow := types.CreateFlowFromPacket(&packet)
-	protocol, source := ClassifyFlow(flow)
+	protocol, source := module.ClassifyFlow(flow)
 	if protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
 		t.Error("Wrong protocol detected:", protocol)
 	}
@@ -30,8 +31,9 @@ func TestClassifyFlow(t *testing.T) {
 }
 
 func TestClassifyFlowEmpty(t *testing.T) {
+	module := NewClassifierModule()
 	flow := types.NewFlow()
-	protocol, source := ClassifyFlow(flow)
+	protocol, source := module.ClassifyFlow(flow)
 	if protocol != types.Unknown || source != types.NoSource {
 		t.Error("Protocol incorrectly detected:", protocol)
 	}
@@ -103,6 +105,7 @@ func TestCheckFirstPayload(t *testing.T) {
 }
 
 func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
+	module := NewClassifierModule()
 	result = make(map[types.Protocol]int)
 	packets, err := utils.ReadDumpFile(filename)
 	if err != nil {
@@ -111,7 +114,7 @@ func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
 	for packet := range packets {
 		flow, _ := types.GetFlowForPacket(&packet)
 		if flow.DetectedProtocol == types.Unknown {
-			res, _ := ClassifyFlow(flow)
+			res, _ := module.ClassifyFlow(flow)
 			result[res]++
 		}
 	}
@@ -139,8 +142,50 @@ func TestClassifiers(t *testing.T) {
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]
 		if count != info.count {
-			t.Errorf("Wrong %s packet count in file %s: expected %d, found %d",
+			t.Errorf("Wrong %v packet count in file %s: expected %d, found %d",
 				info.protocol, info.filename, info.count, count)
 		}
+	}
+}
+
+func TestConfigureModule(t *testing.T) {
+	module := NewClassifierModule()
+	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 3; i++ {
+		<-dumpPackets
+	}
+	packet := <-dumpPackets
+	flow := types.CreateFlowFromPacket(&packet)
+	protocol, _ := module.ClassifyFlow(flow)
+	if protocol != types.HTTP {
+		t.Error("Wrong protocol detected:", protocol)
+	}
+	module.ConfigureModule(ClassifierModuleConfig{
+		Classifiers: []GenericClassifier{},
+	})
+	protocol, _ = module.ClassifyFlow(flow)
+	if protocol != types.Unknown {
+		t.Error("Made detection without any classifiers")
+	}
+	module.ConfigureModule(ClassifierModuleConfig{
+		Classifiers: []GenericClassifier{
+			HTTPClassifier{},
+		}})
+	protocol, _ = module.ClassifyFlow(flow)
+	if protocol != types.HTTP {
+		t.Error("Wrong protocol detected:", protocol)
+	}
+}
+
+func TestInitDestroy(t *testing.T) {
+	module := NewClassifierModule()
+	if err := module.Initialize(); err != nil {
+		t.Errorf("Initalize returned error: %v", err)
+	}
+	if err := module.Destroy(); err != nil {
+		t.Errorf("Destroy returned error: %v", err)
 	}
 }

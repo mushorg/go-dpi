@@ -9,10 +9,9 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
-	"github.com/mushorg/go-dpi/classifiers"
+	"github.com/mushorg/go-dpi"
 	"github.com/mushorg/go-dpi/types"
 	"github.com/mushorg/go-dpi/utils"
-	"github.com/mushorg/go-dpi/wrappers"
 )
 
 func main() {
@@ -20,8 +19,6 @@ func main() {
 		count, idCount int
 		protoCounts    map[types.Protocol]int
 		packetChannel  <-chan gopacket.Packet
-		flow           *types.Flow
-		protocol       types.Protocol
 		err            error
 	)
 
@@ -47,13 +44,16 @@ func main() {
 		return
 	}
 
-	for _, err := range wrappers.InitializeWrappers() {
-		fmt.Printf("%s initialization error: %v\n", err.WrapperName, err)
+	initErrs := godpi.Initialize()
+	if len(initErrs) != 0 {
+		for _, err := range initErrs {
+			fmt.Println(err)
+		}
 		return
 	}
 
 	defer func() {
-		wrappers.DestroyWrappers()
+		godpi.Destroy()
 		fmt.Println()
 		fmt.Println("Number of packets:", count)
 		fmt.Println("Number of packets identified:", idCount)
@@ -71,29 +71,19 @@ func main() {
 	count = 0
 	for packet := range packetChannel {
 		fmt.Printf("Packet %d: ", count+1)
-		flow = types.CreateFlowFromPacket(&packet)
-		protocol, _ = classifiers.ClassifyFlow(flow)
+		flow, isNew := godpi.GetPacketFlow(&packet)
+		protocol, source := godpi.ClassifyFlow(flow)
 		if protocol != types.Unknown {
-			fmt.Printf("Identified as %s\n", protocol)
+			fmt.Printf("Identified as %v by %v", protocol, source)
 			idCount++
 			protoCounts[protocol]++
 		} else {
-			fmt.Println("Could not identify")
+			fmt.Print("Could not identify")
 		}
-
-		wrapperProtocol, source := wrappers.ClassifyFlow(flow)
-		if wrapperProtocol != types.Unknown {
-			fmt.Printf("%s says %s\n", source, wrapperProtocol)
-			if protocol == types.Unknown {
-				idCount++
-				protoCounts[wrapperProtocol]++
-			} else if protocol != wrapperProtocol {
-				// go-dpi and wrapper detected different protocols
-				fmt.Printf("PROTOCOL MISMATCH! go-dpi identified flow "+
-					"as %s, while %s detected it as %s\n", protocol, source, wrapperProtocol)
-			}
+		if isNew {
+			fmt.Println(" (new flow)")
 		} else {
-			fmt.Println("Wrappers could not identify")
+			fmt.Println()
 		}
 
 		select {
