@@ -1,7 +1,8 @@
 package wrappers
 
+// #include "wrappers_config.h"
 // #cgo CFLAGS: -I/usr/local/include/
-// #cgo LDFLAGS: /usr/local/lib/libndpi.a -lpcap -lm -pthread
+// #cgo LDFLAGS: -Wl,-Bstatic -lndpi -Wl,-Bdynamic -lpcap -lm -pthread
 // #include "nDPI_wrapper_impl.h"
 import "C"
 import (
@@ -65,11 +66,8 @@ func NewNDPIWrapper() *NDPIWrapper {
 }
 
 // InitializeWrapper initializes the nDPI wrapper.
-func (wrapper *NDPIWrapper) InitializeWrapper() error {
-	if (*wrapper.provider).ndpiInitialize() != 0 {
-		return errors.New("nDPI global structure initialization failed")
-	}
-	return nil
+func (wrapper *NDPIWrapper) InitializeWrapper() int {
+	return int((*wrapper.provider).ndpiInitialize())
 }
 
 // DestroyWrapper destroys the nDPI wrapper.

@@ -47,7 +47,10 @@ func main() {
 		return
 	}
 
-	wrappers.InitializeWrappers()
+	for _, err := range wrappers.InitializeWrappers() {
+		fmt.Printf("%s initialization error: %v\n", err.WrapperName, err)
+		return
+	}
 
 	defer func() {
 		wrappers.DestroyWrappers()

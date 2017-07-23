@@ -1,3 +1,9 @@
+#ifndef LPI_WRAPPER_ONCE
+#define LPI_WRAPPER_ONCE
+
+#include "wrappers_config.h"
+#ifndef DISABLE_LPI
+
 #include <iostream>
 #include <libprotoident.h>
 #include <libprotoident.h>
@@ -50,3 +56,33 @@ void lpiDestroyLibrary() {
     // Free the library
     lpi_free_library();
 }
+
+#else
+// LPI is disabled, so initialization fails
+
+typedef void lpi_data_t;
+
+extern "C" int lpiInitLibrary() {
+    return ERROR_LIBRARY_DISABLED;
+}
+
+extern "C" lpi_data_t *lpiCreateFlow() {
+    return nullptr;
+}
+
+extern "C" void lpiFreeFlow(lpi_data_t*) {
+}
+
+extern "C" int lpiAddPacketToFlow(lpi_data_t*, const void*, unsigned short) {
+    return -1;
+}
+
+extern "C" int lpiGuessProtocol(lpi_data_t*) {
+    return -1;
+}
+
+extern "C" void lpiDestroyLibrary() {
+}
+
+#endif
+#endif

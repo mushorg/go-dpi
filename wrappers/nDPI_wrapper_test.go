@@ -39,7 +39,7 @@ func TestNDPIWrapper_InitializeWrapper(t *testing.T) {
 		},
 	}
 	// shouldn't be an error if 0 is returned
-	if wrapper.InitializeWrapper() != nil {
+	if wrapper.InitializeWrapper() != 0 {
 		t.Error("Error in wrapper initialization")
 	}
 
@@ -49,7 +49,7 @@ func TestNDPIWrapper_InitializeWrapper(t *testing.T) {
 		},
 	}
 	// should be an error if nonzero is returned
-	if wrapper.InitializeWrapper() == nil {
+	if wrapper.InitializeWrapper() == 0 {
 		t.Error("Wrapper initialization did not throw error")
 	}
 }

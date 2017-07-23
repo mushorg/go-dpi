@@ -4,22 +4,25 @@ import (
 	"testing"
 
 	"github.com/mushorg/go-dpi/types"
-	"github.com/pkg/errors"
 )
 
 type MockWrapper struct {
 	initializeSuccessfully bool
 	initializeCalled       bool
+	libraryDisabled        bool
 	destroyCalled          bool
 	classifyCalled         bool
 }
 
-func (wrapper *MockWrapper) InitializeWrapper() error {
+func (wrapper *MockWrapper) InitializeWrapper() int {
 	wrapper.initializeCalled = true
 	if wrapper.initializeSuccessfully {
-		return nil
+		return 0
+	} else if wrapper.libraryDisabled {
+		return errorLibraryDisabled
+	} else {
+		return -1
 	}
-	return errors.New("Init fail")
 }
 
 func (wrapper *MockWrapper) DestroyWrapper() error {
@@ -42,6 +45,7 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 	wrapperList = []Wrapper{
 		uninitialized,
 	}
+	activeWrappers = []Wrapper{}
 	InitializeWrappers()
 	if !uninitialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
@@ -64,10 +68,11 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 
 func TestClassifyFlowInitialized(t *testing.T) {
 	flow := types.NewFlow()
-	initialized := &MockWrapper{initializeSuccessfully: true}
+	initialized := &MockWrapper{initializeSuccessfully: true, libraryDisabled: false}
 	wrapperList = []Wrapper{
 		initialized,
 	}
+	activeWrappers = []Wrapper{}
 	InitializeWrappers()
 	if !initialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
@@ -85,5 +90,29 @@ func TestClassifyFlowInitialized(t *testing.T) {
 	DestroyWrappers()
 	if !initialized.destroyCalled {
 		t.Error("Destroy not called on active wrapper")
+	}
+}
+
+func TestWrapperLibraryDisabled(t *testing.T) {
+	flow := types.NewFlow()
+	disabled := &MockWrapper{initializeSuccessfully: false, libraryDisabled: true}
+	wrapperList = []Wrapper{
+		disabled,
+	}
+	activeWrappers = []Wrapper{}
+	InitializeWrappers()
+	if !disabled.initializeCalled {
+		t.Error("Initialize not called on wrapper")
+	}
+	result, _ := ClassifyFlow(flow)
+	if disabled.classifyCalled {
+		t.Error("Classify called on disabled wrapper")
+	}
+	if result != types.Unknown {
+		t.Error("Classify returned a protocol without any wrappers", result)
+	}
+	DestroyWrappers()
+	if disabled.destroyCalled {
+		t.Error("Destroy called on disabled wrapper")
 	}
 }
