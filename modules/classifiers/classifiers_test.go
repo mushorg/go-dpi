@@ -21,21 +21,28 @@ func TestClassifyFlow(t *testing.T) {
 	}
 	packet := <-dumpPackets
 	flow := types.CreateFlowFromPacket(&packet)
-	protocol, source := module.ClassifyFlow(flow)
-	if protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
-		t.Error("Wrong protocol detected:", protocol)
+	result := module.ClassifyFlow(flow)
+	if result.Protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
+		t.Error("Wrong protocol detected:", result.Protocol)
 	}
-	if name := flow.ClassificationSource; name != GoDPIName || source != GoDPIName {
+	if name := flow.ClassificationSource; name != GoDPIName || result.Source != GoDPIName {
 		t.Error("Wrong classification source returned:", name)
+	}
+	results := module.ClassifyFlowAll(flow)
+	if len(results) != 1 {
+		t.Error("ClassifyFlowAll didn't return one result")
+	}
+	if results[0] != result {
+		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
 	}
 }
 
 func TestClassifyFlowEmpty(t *testing.T) {
 	module := NewClassifierModule()
 	flow := types.NewFlow()
-	protocol, source := module.ClassifyFlow(flow)
-	if protocol != types.Unknown || source != types.NoSource {
-		t.Error("Protocol incorrectly detected:", protocol)
+	result := module.ClassifyFlow(flow)
+	if result.Protocol != types.Unknown || result.Source != types.NoSource {
+		t.Error("Protocol incorrectly detected:", result.Protocol)
 	}
 }
 
@@ -114,8 +121,8 @@ func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
 	for packet := range packets {
 		flow, _ := types.GetFlowForPacket(&packet)
 		if flow.DetectedProtocol == types.Unknown {
-			res, _ := module.ClassifyFlow(flow)
-			result[res]++
+			res := module.ClassifyFlow(flow)
+			result[res.Protocol]++
 		}
 	}
 	return
@@ -159,24 +166,24 @@ func TestConfigureModule(t *testing.T) {
 	}
 	packet := <-dumpPackets
 	flow := types.CreateFlowFromPacket(&packet)
-	protocol, _ := module.ClassifyFlow(flow)
-	if protocol != types.HTTP {
-		t.Error("Wrong protocol detected:", protocol)
+	result := module.ClassifyFlow(flow)
+	if result.Protocol != types.HTTP {
+		t.Error("Wrong protocol detected:", result.Protocol)
 	}
 	module.ConfigureModule(ClassifierModuleConfig{
 		Classifiers: []GenericClassifier{},
 	})
-	protocol, _ = module.ClassifyFlow(flow)
-	if protocol != types.Unknown {
+	result = module.ClassifyFlow(flow)
+	if result.Protocol != types.Unknown {
 		t.Error("Made detection without any classifiers")
 	}
 	module.ConfigureModule(ClassifierModuleConfig{
 		Classifiers: []GenericClassifier{
 			HTTPClassifier{},
 		}})
-	protocol, _ = module.ClassifyFlow(flow)
-	if protocol != types.HTTP {
-		t.Error("Wrong protocol detected:", protocol)
+	result = module.ClassifyFlow(flow)
+	if result.Protocol != types.HTTP {
+		t.Errorf("Wrong protocol detected: %v", result.Protocol)
 	}
 }
 

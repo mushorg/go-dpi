@@ -68,19 +68,27 @@ func (module *ClassifierModule) Destroy() error {
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
-// that is detected by a classifier if there is one. Otherwise, it returns nil.
-func (module *ClassifierModule) ClassifyFlow(flow *types.Flow) (result types.Protocol, source types.ClassificationSource) {
+// that is detected by a classifier if there is one. Otherwise the returned
+// protocol is Unknown.
+func (module *ClassifierModule) ClassifyFlow(flow *types.Flow) (result types.ClassificationResult) {
 	for _, classifier := range module.classifierList {
 		if heuristic, ok := classifier.(HeuristicClassifier); ok {
 			if heuristic.HeuristicClassify(flow) {
-				result = classifier.GetProtocol()
-				source = GoDPIName
-				flow.DetectedProtocol = result
-				flow.ClassificationSource = GoDPIName
+				result.Protocol = classifier.GetProtocol()
+				result.Source = GoDPIName
+				flow.DetectedProtocol = result.Protocol
+				flow.ClassificationSource = result.Source
 				break
 			}
 		}
 	}
+	return
+}
+
+// ClassifyFlowAll applies all the classifiers to a flow and returns the
+// all the protocols detected by any of the classifiers.
+func (module *ClassifierModule) ClassifyFlowAll(flow *types.Flow) (results []types.ClassificationResult) {
+	results = append(results, module.ClassifyFlow(flow))
 	return
 }
 

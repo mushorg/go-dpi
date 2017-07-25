@@ -85,15 +85,32 @@ func (module *WrapperModule) Destroy() error {
 }
 
 // ClassifyFlow applies all the wrappers to a flow and returns the protocol
-// that is detected by a wrapper if there is one. Otherwise, it returns nil.
-func (module *WrapperModule) ClassifyFlow(flow *types.Flow) (result types.Protocol, source types.ClassificationSource) {
+// that is detected by a wrapper if there is one. Otherwise, it returns the
+// Undefined protocol.
+func (module *WrapperModule) ClassifyFlow(flow *types.Flow) (result types.ClassificationResult) {
 	for _, wrapper := range module.activeWrappers {
 		if proto, err := wrapper.ClassifyFlow(flow); proto != types.Unknown && err == nil {
-			result = proto
-			source = wrapper.GetWrapperName()
-			flow.DetectedProtocol = proto
-			flow.ClassificationSource = source
+			result.Protocol = proto
+			result.Source = wrapper.GetWrapperName()
+			flow.DetectedProtocol = result.Protocol
+			flow.ClassificationSource = result.Source
 			return
+		}
+	}
+	return
+}
+
+// ClassifyFlowAll applies all the wrappers to a flow and returns the protocols
+// that are detected by each one in an array.
+func (module *WrapperModule) ClassifyFlowAll(flow *types.Flow) (results []types.ClassificationResult) {
+	for _, wrapper := range module.activeWrappers {
+		if proto, err := wrapper.ClassifyFlow(flow); err == nil {
+			var result types.ClassificationResult
+			result.Protocol = proto
+			result.Source = wrapper.GetWrapperName()
+			flow.DetectedProtocol = result.Protocol
+			flow.ClassificationSource = result.Source
+			results = append(results, result)
 		}
 	}
 	return

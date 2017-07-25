@@ -50,14 +50,14 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 	if !uninitialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result, source := module.ClassifyFlow(flow)
+	result := module.ClassifyFlow(flow)
 	if uninitialized.classifyCalled {
 		t.Error("Classify called on uninitialized wrapper")
 	}
-	if result != types.Unknown {
+	if result.Protocol != types.Unknown {
 		t.Error("Empty classify did not return unknown")
 	}
-	if source != types.NoSource {
+	if result.Source != types.NoSource {
 		t.Error("Empty classify incorrectly returned source")
 	}
 	module.Destroy()
@@ -77,15 +77,22 @@ func TestClassifyFlowInitialized(t *testing.T) {
 	if !initialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result, source := module.ClassifyFlow(flow)
+	result := module.ClassifyFlow(flow)
 	if !initialized.classifyCalled {
 		t.Error("Classify not called on active wrapper")
 	}
-	if result != types.HTTP || flow.DetectedProtocol != types.HTTP {
+	if result.Protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
 		t.Error("Classify did not return correct result")
 	}
-	if source != "mock" || flow.ClassificationSource != "mock" {
+	if result.Source != "mock" || flow.ClassificationSource != "mock" {
 		t.Error("Classify did not return correct result")
+	}
+	results := module.ClassifyFlowAll(flow)
+	if len(results) != 1 {
+		t.Error("ClassifyFlowAll didn't return one result")
+	}
+	if results[0] != result {
+		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
 	}
 	module.Destroy()
 	if !initialized.destroyCalled {
@@ -104,12 +111,12 @@ func TestWrapperLibraryDisabled(t *testing.T) {
 	if !disabled.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result, _ := module.ClassifyFlow(flow)
+	result := module.ClassifyFlow(flow)
 	if disabled.classifyCalled {
 		t.Error("Classify called on disabled wrapper")
 	}
-	if result != types.Unknown {
-		t.Error("Classify returned a protocol without any wrappers", result)
+	if result.Protocol != types.Unknown {
+		t.Errorf("Classify returned a protocol without any wrappers: %v", result.Protocol)
 	}
 	module.Destroy()
 	if disabled.destroyCalled {

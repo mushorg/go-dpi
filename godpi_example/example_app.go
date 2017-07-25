@@ -70,13 +70,13 @@ func main() {
 	}
 	count = 0
 	for packet := range packetChannel {
-		fmt.Printf("Packet %d: ", count+1)
+		fmt.Printf("Packet #%d: ", count+1)
 		flow, isNew := godpi.GetPacketFlow(&packet)
-		protocol, source := godpi.ClassifyFlow(flow)
-		if protocol != types.Unknown {
-			fmt.Printf("Identified as %v by %v", protocol, source)
+		result := godpi.ClassifyFlow(flow)
+		if result.Protocol != types.Unknown {
+			fmt.Print(result)
 			idCount++
-			protoCounts[protocol]++
+			protoCounts[result.Protocol]++
 		} else {
 			fmt.Print("Could not identify")
 		}

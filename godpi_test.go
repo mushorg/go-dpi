@@ -33,14 +33,19 @@ func (module *mockModule) Destroy() error {
 	return errors.New("Destroy error")
 }
 
-func (module *mockModule) ClassifyFlow(flow *types.Flow) (protocol types.Protocol, source types.ClassificationSource) {
+func (module *mockModule) ClassifyFlow(flow *types.Flow) (result types.ClassificationResult) {
 	module.classifyCalled++
-	source = types.ClassificationSource(module.sourceName)
+	result.Source = types.ClassificationSource(module.sourceName)
 	if module.classifySuccess {
-		protocol = types.HTTP
+		result.Protocol = types.HTTP
 	} else {
-		protocol = types.Unknown
+		result.Protocol = types.Unknown
 	}
+	return
+}
+
+func (module *mockModule) ClassifyFlowAll(flow *types.Flow) (results []types.ClassificationResult) {
+	results = append(results, module.ClassifyFlow(flow))
 	return
 }
 
@@ -54,12 +59,12 @@ func TestInitializeError(t *testing.T) {
 	if module.initCalled != 1 {
 		t.Error("Initialize not called once")
 	}
-	result, source := ClassifyFlow(types.NewFlow())
+	result := ClassifyFlow(types.NewFlow())
 	if module.classifyCalled != 0 {
 		t.Error("Classify called on errored module")
 	}
-	if result != types.Unknown || source != types.NoSource {
-		t.Errorf("Expected no result, got protocol %v from source %v", result, source)
+	if result.Protocol != types.Unknown || result.Source != types.NoSource {
+		t.Errorf("Expected no result, got protocol %v from source %v", result.Protocol, result.Source)
 	}
 	Destroy()
 	if module.destroyCalled != 0 {
@@ -99,15 +104,19 @@ func TestClassifyFlow(t *testing.T) {
 	if noClsModule.initCalled != 1 || clsModule.initCalled != 1 || clsModule2.initCalled != 1 {
 		t.Error("Initialize not called on all modules once")
 	}
-	result, source := ClassifyFlow(types.NewFlow())
+	result := ClassifyFlow(types.NewFlow())
 	if noClsModule.classifyCalled != 1 || clsModule.classifyCalled != 1 {
 		t.Error("Classify not called on first two modules")
 	}
 	if clsModule2.classifyCalled != 0 {
 		t.Error("Classify called on third module")
 	}
-	if result != types.HTTP || source != "module2" {
-		t.Errorf("Expected HTTP from module2, got protocol %v from source %v", result, source)
+	if result.Protocol != types.HTTP || result.Source != "module2" {
+		t.Errorf("Expected HTTP from module2, got protocol %v from source %v", result.Protocol, result.Source)
+	}
+	results := ClassifyFlowAllModules(types.NewFlow())
+	if results[0] != result {
+		t.Errorf("ClassifyFlowAllModules returned different result: %v", results[0])
 	}
 	Destroy()
 	if noClsModule.destroyCalled != 1 || clsModule.destroyCalled != 1 || clsModule2.destroyCalled != 1 {

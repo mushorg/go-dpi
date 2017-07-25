@@ -15,7 +15,8 @@ import (
 type Module interface {
 	Initialize() error
 	Destroy() error
-	ClassifyFlow(*types.Flow) (types.Protocol, types.ClassificationSource)
+	ClassifyFlow(*types.Flow) types.ClassificationResult
+	ClassifyFlowAll(*types.Flow) []types.ClassificationResult
 }
 
 var activatedModules []Module
@@ -83,12 +84,28 @@ func GetPacketFlow(packet *gopacket.Packet) (*types.Flow, bool) {
 // modules in order, until one of them manages to classify it. It returns
 // the detected protocol as well as the source that made the classification.
 // If no classification is made, the protocol Unknown is returned.
-func ClassifyFlow(flow *types.Flow) (types.Protocol, types.ClassificationSource) {
+func ClassifyFlow(flow *types.Flow) (result types.ClassificationResult) {
 	for _, module := range activatedModules {
-		protocol, source := module.ClassifyFlow(flow)
-		if protocol != types.Unknown {
-			return protocol, source
+		resultTmp := module.ClassifyFlow(flow)
+		if resultTmp.Protocol != types.Unknown {
+			result = resultTmp
+			return
 		}
 	}
-	return types.Unknown, types.NoSource
+	return
+}
+
+// ClassifyFlowAllModules takes a Flow and tries to classify it with all of the
+// activated modules. However, as opposed to ClassifyFlow, it will return all
+// of the results returned from the modules, not only the first successful one.
+func ClassifyFlowAllModules(flow *types.Flow) (results []types.ClassificationResult) {
+	for _, module := range activatedModules {
+		resultsTmp := module.ClassifyFlowAll(flow)
+		for _, resultTmp := range resultsTmp {
+			if resultTmp.Protocol != types.Unknown {
+				results = append(results, resultTmp)
+			}
+		}
+	}
+	return
 }
