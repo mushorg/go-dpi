@@ -13,9 +13,6 @@ type SMBClassifier struct{}
 
 // HeuristicClassify for SMBClassifier
 func (classifier SMBClassifier) HeuristicClassify(flow *types.Flow) bool {
-	if len(flow.Packets) == 0 {
-		return false
-	}
 	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []*gopacket.Packet) bool {
 			// skip netbios layer if it exists

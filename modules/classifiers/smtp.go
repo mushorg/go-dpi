@@ -12,9 +12,6 @@ type SMTPClassifier struct{}
 
 // HeuristicClassify for SMTPClassifier
 func (classifier SMTPClassifier) HeuristicClassify(flow *types.Flow) bool {
-	if len(flow.Packets) == 0 {
-		return false
-	}
 	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []*gopacket.Packet) bool {
 			payloadStr := string(payload)
