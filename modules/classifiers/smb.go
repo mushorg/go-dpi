@@ -1,8 +1,11 @@
 package classifiers
 
 import (
+	"encoding/binary"
+	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/mushorg/go-dpi/types"
+	"strings"
 )
 
 // SMBClassifier struct
@@ -13,18 +16,25 @@ func (classifier SMBClassifier) HeuristicClassify(flow *types.Flow) bool {
 	if len(flow.Packets) == 0 {
 		return false
 	}
-	for _, packet := range flow.Packets {
-		if layer := (*packet).Layer(layers.LayerTypeTCP); layer != nil {
-			srcPort := layer.(*layers.TCP).SrcPort
-			dstPort := layer.(*layers.TCP).DstPort
-			if srcPort != 445 && dstPort != 445 {
-				return false
+	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+			// skip netbios layer if it exists
+			if len(payload) > 4 && payload[0] == 0 {
+				netbiosLen := binary.BigEndian.Uint32(payload[:4])
+				if int(netbiosLen) == len(payload[4:]) {
+					payload = payload[4:]
+				}
 			}
-		} else {
-			return false
-		}
-	}
-	return true
+			// SMB protocol prefix
+			hasSMBPrefix := strings.HasPrefix(string(payload), "\xFFSMB")
+			// SMB protocol negotiation code
+			isNegotiateProtocol := payload[4] == 0x72
+			// error code must be zero
+			errCode := binary.BigEndian.Uint32(payload[5:9])
+			// if flag is 0 this packet is from the server to the client
+			directionFlag := payload[9] & 0x80
+			return hasSMBPrefix && isNegotiateProtocol && errCode == 0 && directionFlag == 0
+		})
 }
 
 // GetProtocol returns the corresponding protocol

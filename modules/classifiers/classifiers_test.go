@@ -141,6 +141,7 @@ func TestClassifiers(t *testing.T) {
 		{types.DNS, "../../godpi_example/dumps/dns+icmp.pcapng", 5},
 		{types.ICMP, "../../godpi_example/dumps/dns+icmp.pcapng", 22},
 		{types.ICMP, "../../godpi_example/dumps/icmpv6.pcap", 49},
+		{types.SMB, "../../godpi_example/dumps/smb.cap", 212},
 		{types.SSL, "../../godpi_example/dumps/https.cap", 1},
 		{types.SSH, "../../godpi_example/dumps/ssh.pcap", 1},
 		{types.SMTP, "../../godpi_example/dumps/smtp.pcap", 1},
