@@ -22,6 +22,9 @@ func (classifier SMBClassifier) HeuristicClassify(flow *types.Flow) bool {
 					payload = payload[4:]
 				}
 			}
+			if len(payload) < 10 {
+				return false
+			}
 			// SMB protocol prefix
 			hasSMBPrefix := strings.HasPrefix(string(payload), "\xFFSMB")
 			// SMB protocol negotiation code

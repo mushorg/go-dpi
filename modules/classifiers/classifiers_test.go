@@ -141,6 +141,7 @@ func TestClassifiers(t *testing.T) {
 		{types.DNS, "../../godpi_example/dumps/dns+icmp.pcapng", 5},
 		{types.ICMP, "../../godpi_example/dumps/dns+icmp.pcapng", 22},
 		{types.ICMP, "../../godpi_example/dumps/icmpv6.pcap", 49},
+		{types.NetBIOS, "../../godpi_example/dumps/netbios.pcap", 12},
 		{types.RDP, "../../godpi_example/dumps/rdp.pcap", 2},
 		{types.RPC, "../../godpi_example/dumps/dcerpc01.pcap", 3},
 		{types.RPC, "../../godpi_example/dumps/dcerpc02.pcap", 1},
