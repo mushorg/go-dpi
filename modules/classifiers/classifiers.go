@@ -42,11 +42,11 @@ type ClassifierModuleConfig struct {
 func NewClassifierModule() *ClassifierModule {
 	module := &ClassifierModule{}
 	module.classifierList = []GenericClassifier{
-		DNSClassifier{},
 		FTPClassifier{},
 		HTTPClassifier{},
 		ICMPClassifier{},
 		NetBIOSClassifier{},
+		DNSClassifier{},
 		RDPClassifier{},
 		RPCClassifier{},
 		SMBClassifier{},

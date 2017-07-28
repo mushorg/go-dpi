@@ -12,9 +12,6 @@ type FTPClassifier struct{}
 
 // HeuristicClassify for FTPClassifier
 func (classifier FTPClassifier) HeuristicClassify(flow *types.Flow) bool {
-	if len(flow.Packets) == 0 {
-		return false
-	}
 	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []*gopacket.Packet) bool {
 			payloadStr := string(payload)

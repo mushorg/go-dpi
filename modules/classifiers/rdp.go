@@ -1,8 +1,11 @@
 package classifiers
 
 import (
+	"encoding/binary"
+	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/mushorg/go-dpi/types"
+	"strings"
 )
 
 // RDPClassifier struct
@@ -10,27 +13,22 @@ type RDPClassifier struct{}
 
 // HeuristicClassify for RDPClassifier
 func (classifier RDPClassifier) HeuristicClassify(flow *types.Flow) bool {
-	if len(flow.Packets) == 0 {
-		return false
-	}
-	for _, packet := range flow.Packets {
-		if layer := (*packet).Layer(layers.LayerTypeTCP); layer != nil {
-			srcPort := layer.(*layers.TCP).SrcPort
-			dstPort := layer.(*layers.TCP).DstPort
-			if srcPort != 3389 && dstPort != 3389 {
+	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+			if len(payload) < 20 {
 				return false
 			}
-		} else if layer := (*packet).Layer(layers.LayerTypeUDP); layer != nil {
-			srcPort := layer.(*layers.UDP).SrcPort
-			dstPort := layer.(*layers.UDP).DstPort
-			if srcPort != 3389 && dstPort != 3389 {
-				return false
-			}
-		} else {
-			return false
-		}
-	}
-	return true
+			tpktLen := int(binary.BigEndian.Uint16(payload[2:4]))
+			// check TPKT header
+			isValidTpkt := payload[0] == 3 && payload[1] == 0 && tpktLen == len(payload)
+			// check COTP header
+			isValidCotp := int(payload[4]) == len(payload[5:]) && payload[5] == 0xE0
+			// check RDP payload
+			rdpPayloadStr := string(payload[11:])
+			isValidRdp := strings.Contains(rdpPayloadStr, "mstshash=") ||
+				strings.Contains(rdpPayloadStr, "msts=")
+			return isValidTpkt && isValidCotp && isValidRdp
+		})
 }
 
 // GetProtocol returns the corresponding protocol
