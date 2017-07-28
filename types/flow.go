@@ -1,13 +1,27 @@
 // Package types contains the basic types used by the library.
 package types
 
-import "github.com/google/gopacket"
+import (
+	"fmt"
+	"github.com/google/gopacket"
+)
 
 var flowTracker = make(map[gopacket.Flow]*Flow)
 
 // ClassificationSource is the module of the library that is responsible for
 // the classification of a flow.
 type ClassificationSource string
+
+// ClassificationResult contains the detected protocol and the source of
+// the classification from a classification attempt.
+type ClassificationResult struct {
+	Protocol Protocol
+	Source   ClassificationSource
+}
+
+func (result ClassificationResult) String() string {
+	return fmt.Sprintf("Detected protocol %v from source %v", result.Protocol, result.Source)
+}
 
 // NoSource is returned if no classification was made.
 const NoSource = ""

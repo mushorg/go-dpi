@@ -11,7 +11,7 @@ func TestNDPIWrapperClassifyFlow(t *testing.T) {
 	wrapper.InitializeWrapper()
 	defer wrapper.DestroyWrapper()
 
-	packetChan, _ := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	packetChan, _ := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 
 	flow := types.NewFlow()
 	for i := 0; i < 3; i++ {
@@ -21,7 +21,7 @@ func TestNDPIWrapperClassifyFlow(t *testing.T) {
 
 	// first three packets should not be enough to classify the flow
 	if result, _ := wrapper.ClassifyFlow(flow); result != types.Unknown {
-		t.Errorf("Incorrectly detected %s instead of Unknown", result)
+		t.Errorf("Incorrectly detected %v instead of Unknown", result)
 	}
 
 	flow = types.NewFlow()
@@ -30,7 +30,7 @@ func TestNDPIWrapperClassifyFlow(t *testing.T) {
 
 	// fourth packet should be HTTP
 	if result, _ := wrapper.ClassifyFlow(flow); result != types.HTTP {
-		t.Errorf("Incorrectly detected %s instead of HTTP", result)
+		t.Errorf("Incorrectly detected %v instead of HTTP", result)
 	}
 }
 

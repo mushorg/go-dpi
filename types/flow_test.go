@@ -69,3 +69,10 @@ func TestFlushTrackedFlows(t *testing.T) {
 		t.Error("Detected existing flow for first packet after flush")
 	}
 }
+
+func TestClassificationResultString(t *testing.T) {
+	result := ClassificationResult{Protocol: "proto", Source: "src"}
+	if resStr := result.String(); resStr != "Detected protocol proto from source src" {
+		t.Errorf("Wrong string returned: %v", resStr)
+	}
+}

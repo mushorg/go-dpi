@@ -42,25 +42,25 @@ func (wrapper *MockWrapper) GetWrapperName() types.ClassificationSource {
 func TestClassifyFlowUninitialized(t *testing.T) {
 	flow := types.NewFlow()
 	uninitialized := &MockWrapper{initializeSuccessfully: false}
-	wrapperList = []Wrapper{
-		uninitialized,
-	}
-	activeWrappers = []Wrapper{}
-	InitializeWrappers()
+	module := NewWrapperModule()
+	module.ConfigureModule(WrapperModuleConfig{
+		Wrappers: []Wrapper{uninitialized},
+	})
+	module.Initialize()
 	if !uninitialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result, source := ClassifyFlow(flow)
+	result := module.ClassifyFlow(flow)
 	if uninitialized.classifyCalled {
 		t.Error("Classify called on uninitialized wrapper")
 	}
-	if result != types.Unknown {
+	if result.Protocol != types.Unknown {
 		t.Error("Empty classify did not return unknown")
 	}
-	if source != types.NoSource {
+	if result.Source != types.NoSource {
 		t.Error("Empty classify incorrectly returned source")
 	}
-	DestroyWrappers()
+	module.Destroy()
 	if uninitialized.destroyCalled {
 		t.Error("Destroy called on uninitialized wrapper")
 	}
@@ -69,25 +69,32 @@ func TestClassifyFlowUninitialized(t *testing.T) {
 func TestClassifyFlowInitialized(t *testing.T) {
 	flow := types.NewFlow()
 	initialized := &MockWrapper{initializeSuccessfully: true, libraryDisabled: false}
-	wrapperList = []Wrapper{
-		initialized,
-	}
-	activeWrappers = []Wrapper{}
-	InitializeWrappers()
+	module := NewWrapperModule()
+	module.ConfigureModule(WrapperModuleConfig{
+		Wrappers: []Wrapper{initialized},
+	})
+	module.Initialize()
 	if !initialized.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result, source := ClassifyFlow(flow)
+	result := module.ClassifyFlow(flow)
 	if !initialized.classifyCalled {
 		t.Error("Classify not called on active wrapper")
 	}
-	if result != types.HTTP || flow.DetectedProtocol != types.HTTP {
+	if result.Protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
 		t.Error("Classify did not return correct result")
 	}
-	if source != "mock" || flow.ClassificationSource != "mock" {
+	if result.Source != "mock" || flow.ClassificationSource != "mock" {
 		t.Error("Classify did not return correct result")
 	}
-	DestroyWrappers()
+	results := module.ClassifyFlowAll(flow)
+	if len(results) != 1 {
+		t.Error("ClassifyFlowAll didn't return one result")
+	}
+	if results[0] != result {
+		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
+	}
+	module.Destroy()
 	if !initialized.destroyCalled {
 		t.Error("Destroy not called on active wrapper")
 	}
@@ -96,22 +103,22 @@ func TestClassifyFlowInitialized(t *testing.T) {
 func TestWrapperLibraryDisabled(t *testing.T) {
 	flow := types.NewFlow()
 	disabled := &MockWrapper{initializeSuccessfully: false, libraryDisabled: true}
-	wrapperList = []Wrapper{
-		disabled,
-	}
-	activeWrappers = []Wrapper{}
-	InitializeWrappers()
+	module := NewWrapperModule()
+	module.ConfigureModule(WrapperModuleConfig{
+		Wrappers: []Wrapper{disabled},
+	})
+	module.Initialize()
 	if !disabled.initializeCalled {
 		t.Error("Initialize not called on wrapper")
 	}
-	result, _ := ClassifyFlow(flow)
+	result := module.ClassifyFlow(flow)
 	if disabled.classifyCalled {
 		t.Error("Classify called on disabled wrapper")
 	}
-	if result != types.Unknown {
-		t.Error("Classify returned a protocol without any wrappers", result)
+	if result.Protocol != types.Unknown {
+		t.Errorf("Classify returned a protocol without any wrappers: %v", result.Protocol)
 	}
-	DestroyWrappers()
+	module.Destroy()
 	if disabled.destroyCalled {
 		t.Error("Destroy called on disabled wrapper")
 	}

@@ -9,7 +9,12 @@ import (
 
 // GoDPIName is the name of the library, to be used as an identifier for the
 // source of a classification.
-const GoDPIName = "go-dpi"
+const GoDPIName = types.ClassificationSource("go-dpi")
+
+// ClassifierModule is the module that contains the custom go-dpi flow classifiers.
+type ClassifierModule struct {
+	classifierList []GenericClassifier
+}
 
 // GenericClassifier is implemented by every classifier. It contains a method
 // that returns the classifier's detected protocol.
@@ -26,35 +31,72 @@ type HeuristicClassifier interface {
 	HeuristicClassify(*types.Flow) bool
 }
 
-var classifierList = [...]GenericClassifier{
-	DNSClassifier{},
-	FTPClassifier{},
-	HTTPClassifier{},
-	ICMPClassifier{},
-	NetBIOSClassifier{},
-	RDPClassifier{},
-	RPCClassifier{},
-	SMBClassifier{},
-	SMTPClassifier{},
-	SSHClassifier{},
-	SSLClassifier{},
+// ClassifierModuleConfig is given to the module's ConfigureModule method, in
+// order to set which classifiers are active and their order.
+type ClassifierModuleConfig struct {
+	Classifiers []GenericClassifier
+}
+
+// NewClassifierModule returns a new ClassifierModule with the default
+// configuration. By default, all classifiers are active.
+func NewClassifierModule() *ClassifierModule {
+	module := &ClassifierModule{}
+	module.classifierList = []GenericClassifier{
+		DNSClassifier{},
+		FTPClassifier{},
+		HTTPClassifier{},
+		ICMPClassifier{},
+		NetBIOSClassifier{},
+		RDPClassifier{},
+		RPCClassifier{},
+		SMBClassifier{},
+		SMTPClassifier{},
+		SSHClassifier{},
+		SSLClassifier{},
+	}
+	return module
+}
+
+// Initialize initializes the module instance.
+func (module *ClassifierModule) Initialize() error {
+	return nil
+}
+
+// Destroy destroys the module instance.
+func (module *ClassifierModule) Destroy() error {
+	return nil
 }
 
 // ClassifyFlow applies all the classifiers to a flow and returns the protocol
-// that is detected by a classifier if there is one. Otherwise, it returns nil.
-func ClassifyFlow(flow *types.Flow) (result types.Protocol, source types.ClassificationSource) {
-	for _, classifier := range classifierList {
+// that is detected by a classifier if there is one. Otherwise the returned
+// protocol is Unknown.
+func (module *ClassifierModule) ClassifyFlow(flow *types.Flow) (result types.ClassificationResult) {
+	for _, classifier := range module.classifierList {
 		if heuristic, ok := classifier.(HeuristicClassifier); ok {
 			if heuristic.HeuristicClassify(flow) {
-				result = classifier.GetProtocol()
-				source = GoDPIName
-				flow.DetectedProtocol = result
-				flow.ClassificationSource = GoDPIName
+				result.Protocol = classifier.GetProtocol()
+				result.Source = GoDPIName
+				flow.DetectedProtocol = result.Protocol
+				flow.ClassificationSource = result.Source
 				break
 			}
 		}
 	}
 	return
+}
+
+// ClassifyFlowAll applies all the classifiers to a flow and returns the
+// all the protocols detected by any of the classifiers.
+func (module *ClassifierModule) ClassifyFlowAll(flow *types.Flow) (results []types.ClassificationResult) {
+	results = append(results, module.ClassifyFlow(flow))
+	return
+}
+
+// ConfigureModule configures this module instance with the given configuration.
+// This should called before the module instance is initialized, otherwise
+// Destroy and Initialize should be called on the module manually.
+func (module *ClassifierModule) ConfigureModule(config ClassifierModuleConfig) {
+	module.classifierList = config.Classifiers
 }
 
 // checkFlowLayer applies the check function to the specified layer of each

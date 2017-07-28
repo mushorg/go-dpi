@@ -11,7 +11,8 @@ import (
 )
 
 func TestClassifyFlow(t *testing.T) {
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	module := NewClassifierModule()
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,25 +21,33 @@ func TestClassifyFlow(t *testing.T) {
 	}
 	packet := <-dumpPackets
 	flow := types.CreateFlowFromPacket(&packet)
-	protocol, source := ClassifyFlow(flow)
-	if protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
-		t.Error("Wrong protocol detected:", protocol)
+	result := module.ClassifyFlow(flow)
+	if result.Protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
+		t.Error("Wrong protocol detected:", result.Protocol)
 	}
-	if name := flow.ClassificationSource; name != GoDPIName || source != GoDPIName {
+	if name := flow.ClassificationSource; name != GoDPIName || result.Source != GoDPIName {
 		t.Error("Wrong classification source returned:", name)
+	}
+	results := module.ClassifyFlowAll(flow)
+	if len(results) != 1 {
+		t.Error("ClassifyFlowAll didn't return one result")
+	}
+	if results[0] != result {
+		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
 	}
 }
 
 func TestClassifyFlowEmpty(t *testing.T) {
+	module := NewClassifierModule()
 	flow := types.NewFlow()
-	protocol, source := ClassifyFlow(flow)
-	if protocol != types.Unknown || source != types.NoSource {
-		t.Error("Protocol incorrectly detected:", protocol)
+	result := module.ClassifyFlow(flow)
+	if result.Protocol != types.Unknown || result.Source != types.NoSource {
+		t.Error("Protocol incorrectly detected:", result.Protocol)
 	}
 }
 
 func TestCheckFlowLayer(t *testing.T) {
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +78,7 @@ func TestCheckFlowLayer(t *testing.T) {
 }
 
 func TestCheckFirstPayload(t *testing.T) {
-	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,6 +112,7 @@ func TestCheckFirstPayload(t *testing.T) {
 }
 
 func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
+	module := NewClassifierModule()
 	result = make(map[types.Protocol]int)
 	packets, err := utils.ReadDumpFile(filename)
 	if err != nil {
@@ -111,8 +121,8 @@ func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
 	for packet := range packets {
 		flow, _ := types.GetFlowForPacket(&packet)
 		if flow.DetectedProtocol == types.Unknown {
-			res, _ := ClassifyFlow(flow)
-			result[res]++
+			res := module.ClassifyFlow(flow)
+			result[res.Protocol]++
 		}
 	}
 	return
@@ -127,20 +137,62 @@ type protocolTestInfo struct {
 func TestClassifiers(t *testing.T) {
 	// test for each protocol the expected number of flows in the appropriate capture file
 	protocolInfos := []protocolTestInfo{
-		{types.HTTP, "../godpi_example/dumps/http.cap", 2},
-		{types.DNS, "../godpi_example/dumps/dns+icmp.pcapng", 5},
-		{types.ICMP, "../godpi_example/dumps/dns+icmp.pcapng", 22},
-		{types.ICMP, "../godpi_example/dumps/icmpv6.pcap", 49},
-		{types.SSL, "../godpi_example/dumps/https.cap", 1},
-		{types.SSH, "../godpi_example/dumps/ssh.pcap", 1},
-		{types.SMTP, "../godpi_example/dumps/smtp.pcap", 1},
-		{types.FTP, "../godpi_example/dumps/ftp.pcap", 1},
+		{types.HTTP, "../../godpi_example/dumps/http.cap", 2},
+		{types.DNS, "../../godpi_example/dumps/dns+icmp.pcapng", 5},
+		{types.ICMP, "../../godpi_example/dumps/dns+icmp.pcapng", 22},
+		{types.ICMP, "../../godpi_example/dumps/icmpv6.pcap", 49},
+		{types.SSL, "../../godpi_example/dumps/https.cap", 1},
+		{types.SSH, "../../godpi_example/dumps/ssh.pcap", 1},
+		{types.SMTP, "../../godpi_example/dumps/smtp.pcap", 1},
+		{types.FTP, "../../godpi_example/dumps/ftp.pcap", 1},
 	}
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]
 		if count != info.count {
-			t.Errorf("Wrong %s packet count in file %s: expected %d, found %d",
+			t.Errorf("Wrong %v packet count in file %s: expected %d, found %d",
 				info.protocol, info.filename, info.count, count)
 		}
+	}
+}
+
+func TestConfigureModule(t *testing.T) {
+	module := NewClassifierModule()
+	dumpPackets, err := utils.ReadDumpFile("../../godpi_example/dumps/http.cap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 3; i++ {
+		<-dumpPackets
+	}
+	packet := <-dumpPackets
+	flow := types.CreateFlowFromPacket(&packet)
+	result := module.ClassifyFlow(flow)
+	if result.Protocol != types.HTTP {
+		t.Error("Wrong protocol detected:", result.Protocol)
+	}
+	module.ConfigureModule(ClassifierModuleConfig{
+		Classifiers: []GenericClassifier{},
+	})
+	result = module.ClassifyFlow(flow)
+	if result.Protocol != types.Unknown {
+		t.Error("Made detection without any classifiers")
+	}
+	module.ConfigureModule(ClassifierModuleConfig{
+		Classifiers: []GenericClassifier{
+			HTTPClassifier{},
+		}})
+	result = module.ClassifyFlow(flow)
+	if result.Protocol != types.HTTP {
+		t.Errorf("Wrong protocol detected: %v", result.Protocol)
+	}
+}
+
+func TestInitDestroy(t *testing.T) {
+	module := NewClassifierModule()
+	if err := module.Initialize(); err != nil {
+		t.Errorf("Initalize returned error: %v", err)
+	}
+	if err := module.Destroy(); err != nil {
+		t.Errorf("Destroy returned error: %v", err)
 	}
 }
