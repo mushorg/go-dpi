@@ -4,8 +4,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/gopacket"
 	"github.com/mushorg/go-dpi/types"
 	"github.com/mushorg/go-dpi/utils"
+	"unsafe"
 )
 
 func TestNewNDPIWrapper(t *testing.T) {
@@ -73,9 +75,14 @@ func TestNDPIWrapper_ClassifyFlowErrors(t *testing.T) {
 
 	wrapper := &NDPIWrapper{
 		provider: &NDPIWrapperProvider{
-			ndpiPacketProcess: func(_, _, _ int, _ []byte) int32 {
+			ndpiPacketProcess: func(_ gopacket.Packet, _ unsafe.Pointer) int32 {
 				timesCalled++
 				return retVal
+			},
+			ndpiAllocFlow: func(gopacket.Packet) unsafe.Pointer {
+				return nil
+			},
+			ndpiFreeFlow: func(unsafe.Pointer) {
 			},
 		},
 	}

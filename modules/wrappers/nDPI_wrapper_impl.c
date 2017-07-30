@@ -17,7 +17,6 @@
 
 #include "nDPI_wrapper_impl.h"
 
-#define	MAX_NDPI_FLOWS     20000000
 #define ETH_P_IP 0x0800
 
 #define ERR_IPV6_NOT_SUPPORTED 10
@@ -30,8 +29,6 @@ static u_int32_t detection_tick_resolution = 1000;
 
 static u_int32_t size_id_struct = 0;
 static u_int32_t size_flow_struct = 0;
-static struct ndpi_flow *ndpi_flows_root = NULL;
-static u_int32_t ndpi_flow_count = 0;
 
 // flow tracking
 typedef struct ndpi_flow {
@@ -89,8 +86,6 @@ static void ndpi_flow_freer(void *node) {
 
 extern void ndpiDestroy(void)
 {
-  ndpi_tdestroy(ndpi_flows_root, ndpi_flow_freer);
-  ndpi_flows_root = NULL;
   ndpi_exit_detection_module(ndpi_struct);
 }
 
@@ -120,6 +115,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct pcap_pkthdr *header,
   u_int16_t upper_port;
   struct ndpi_flow flow;
   void *ret;
+  struct ndpi_flow *newflow;
 
   if (ipsize < 20)
     return NULL;
@@ -164,59 +160,36 @@ static struct ndpi_flow *get_ndpi_flow(const struct pcap_pkthdr *header,
     upper_port = 0;
   }
 
-  flow.protocol = iph->protocol;
-  flow.lower_ip = lower_ip;
-  flow.upper_ip = upper_ip;
-  flow.lower_port = lower_port;
-  flow.upper_port = upper_port;
-  flow.first_packet_time_sec = header->ts.tv_sec;
-  flow.first_packet_time_usec = header->ts.tv_usec;
+  newflow = (struct ndpi_flow*)malloc(sizeof(struct ndpi_flow));
 
-  ret = ndpi_tfind(&flow, (void*)&ndpi_flows_root, node_cmp);
+  if(newflow == NULL) {
+    printf("[NDPI] %s(1): not enough memory\n", __FUNCTION__);
+    return NULL;
+  }
 
-  if(ret == NULL) {
-    if (ndpi_flow_count == MAX_NDPI_FLOWS) {
-      printf("ERROR: maximum flow count (%u) has been exceeded\n", MAX_NDPI_FLOWS);
-      exit(-1);
-    } else {
-      struct ndpi_flow *newflow = (struct ndpi_flow*)malloc(sizeof(struct ndpi_flow));
+  memset(newflow, 0, sizeof(struct ndpi_flow));
+  newflow->protocol = iph->protocol;
+  newflow->lower_ip = lower_ip, newflow->upper_ip = upper_ip;
+  newflow->lower_port = lower_port, newflow->upper_port = upper_port;
+  newflow->first_packet_time_sec = header->ts.tv_sec;
+  newflow->first_packet_time_usec = header->ts.tv_usec;
 
-      if(newflow == NULL) {
-	    printf("[NDPI] %s(1): not enough memory\n", __FUNCTION__);
-	    return NULL;
-      }
+  newflow->ndpi_flow = calloc(1, size_flow_struct);
+  newflow->src_id = calloc(1, size_id_struct);
+  newflow->dst_id = calloc(1, size_id_struct);
 
-      memset(newflow, 0, sizeof(struct ndpi_flow));
-      newflow->protocol = iph->protocol;
-      newflow->lower_ip = lower_ip, newflow->upper_ip = upper_ip;
-      newflow->lower_port = lower_port, newflow->upper_port = upper_port;
-      newflow->first_packet_time_sec = header->ts.tv_sec;
-      newflow->first_packet_time_usec = header->ts.tv_usec;
-
-      newflow->ndpi_flow = calloc(1, size_flow_struct);
-      newflow->src_id = calloc(1, size_id_struct);
-      newflow->dst_id = calloc(1, size_id_struct);
-
-      ndpi_tsearch(newflow, (void*)&ndpi_flows_root, node_cmp);
-      ndpi_flow_count ++;
-
-      return newflow;
-    }
-  } else
-    return *(struct ndpi_flow**)ret;
+  return newflow;
 }
 
 
 static int packet_processing(const u_int64_t time, const struct pcap_pkthdr *header,
-              const struct ndpi_iphdr *iph, u_int16_t ipsize, u_int16_t rawsize)
+              const struct ndpi_iphdr *iph, u_int16_t ipsize, u_int16_t rawsize, struct ndpi_flow *flow)
 {
   struct ndpi_id_struct *src, *dst;
-  struct ndpi_flow *flow;
   struct ndpi_flow_struct *ndpi_flow = NULL;
   u_int16_t protocol = 0;
   u_int16_t frag_off = ntohs(iph->frag_off);
 
-  flow = get_ndpi_flow(header, iph, ipsize);
   if (flow != NULL) {
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
@@ -251,7 +224,7 @@ static int packet_processing(const u_int64_t time, const struct pcap_pkthdr *hea
 
 
 // process a new packet
-extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char *packet)
+extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char *packet, void *flow)
 {
   const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
   struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[sizeof(struct ndpi_ethhdr)];
@@ -275,8 +248,27 @@ extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char *pac
     ip_offset = sizeof(struct ndpi_ethhdr);
 
     // process the packet
-    return packet_processing(time, header, iph, header->len - ip_offset, header->len);
+    return packet_processing(time, header, iph, header->len - ip_offset, header->len, (struct ndpi_flow*)flow);
   }
+}
+
+extern void *ndpiGetFlow(const struct pcap_pkthdr *header, const u_char *packet) {
+  const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
+  struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[sizeof(struct ndpi_ethhdr)];
+  u_int16_t type, ip_offset;
+
+  type = ethernet->h_proto;
+
+  // just work on Ethernet packets that contain IP
+  if (type == htons(ETH_P_IP) && header->caplen >= sizeof(struct ndpi_ethhdr) && iph->version == 4) {
+    ip_offset = sizeof(struct ndpi_ethhdr);
+    return get_ndpi_flow(header, iph, header->len - ip_offset);
+  }
+  return NULL;
+}
+
+extern void ndpiFreeFlow(void *flow) {
+    free(flow);
 }
 
 #else
@@ -291,6 +283,13 @@ extern void ndpiDestroy(void) {
 
 extern int ndpiPacketProcess(const struct pcap_pkthdr *header, const u_char *packet) {
     return -1;
+}
+
+extern void *ndpiGetFlow(const struct pcap_pkthdr *header, const u_char *packet) {
+    return NULL;
+}
+
+extern void ndpiFreeFlow(void *flow) {
 }
 
 #endif
