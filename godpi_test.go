@@ -51,7 +51,7 @@ func (module *mockModule) ClassifyFlowAll(flow *types.Flow) (results []types.Cla
 
 func TestInitializeError(t *testing.T) {
 	module := &mockModule{initSuccess: false}
-	SetModules([]Module{module})
+	SetModules([]types.Module{module})
 	errors := Initialize()
 	if errNum := len(errors); errNum != 1 {
 		t.Errorf("Expected one error to be returned from initializing, got %d", errNum)
@@ -74,7 +74,7 @@ func TestInitializeError(t *testing.T) {
 
 func TestDestroyError(t *testing.T) {
 	module := &mockModule{initSuccess: true, destroySuccess: false}
-	SetModules([]Module{module})
+	SetModules([]types.Module{module})
 	Initialize()
 	errors := Destroy()
 	if module.destroyCalled != 1 {
@@ -96,7 +96,7 @@ func TestClassifyFlow(t *testing.T) {
 	noClsModule := &mockModule{initSuccess: true, classifySuccess: false, destroySuccess: true, sourceName: "module1"}
 	clsModule := &mockModule{initSuccess: true, classifySuccess: true, destroySuccess: true, sourceName: "module2"}
 	clsModule2 := &mockModule{initSuccess: true, classifySuccess: true, destroySuccess: true, sourceName: "module3"}
-	SetModules([]Module{noClsModule, clsModule, clsModule2})
+	SetModules([]types.Module{noClsModule, clsModule, clsModule2})
 	errors := Initialize()
 	if errNum := len(errors); errNum != 0 {
 		t.Errorf("Expected no errors to be returned from initializing, got %d", errNum)
@@ -126,7 +126,7 @@ func TestClassifyFlow(t *testing.T) {
 
 func TestDoubleInitialize(t *testing.T) {
 	module := &mockModule{initSuccess: true}
-	SetModules([]Module{module})
+	SetModules([]types.Module{module})
 	Initialize()
 	if module.initCalled != 1 {
 		t.Error("Initialize not called once")

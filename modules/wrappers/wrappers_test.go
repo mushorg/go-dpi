@@ -123,3 +123,11 @@ func TestWrapperLibraryDisabled(t *testing.T) {
 		t.Error("Destroy called on disabled wrapper")
 	}
 }
+
+func BenchmarkWrapperModule(b *testing.B) {
+	module := NewWrapperModule()
+	err := types.BenchmarkModule("../../godpi_example/dumps/", module)
+	if err != nil {
+		b.Error(err)
+	}
+}

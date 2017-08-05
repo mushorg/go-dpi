@@ -201,3 +201,11 @@ func TestInitDestroy(t *testing.T) {
 		t.Errorf("Destroy returned error: %v", err)
 	}
 }
+
+func BenchmarkClassifierModule(b *testing.B) {
+	module := NewClassifierModule()
+	err := types.BenchmarkModule("../../godpi_example/dumps/", module)
+	if err != nil {
+		b.Error(err)
+	}
+}

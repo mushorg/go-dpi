@@ -8,19 +8,8 @@ import (
 	"github.com/mushorg/go-dpi/types"
 )
 
-// Module is implemented by every classification module provided by the
-// library. Each module has its own initialization and destruction methods,
-// as well as their own method for classifying a flow. They may also be
-// enabled or disabled and usually will also provide a configuration method.
-type Module interface {
-	Initialize() error
-	Destroy() error
-	ClassifyFlow(*types.Flow) types.ClassificationResult
-	ClassifyFlowAll(*types.Flow) []types.ClassificationResult
-}
-
-var activatedModules []Module
-var moduleList = []Module{
+var activatedModules []types.Module
+var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
 	wrappers.NewWrapperModule(),
 }
@@ -49,7 +38,7 @@ func Initialize() (errs []error) {
 
 // Destroy frees all allocated resources and deactivates the active modules.
 func Destroy() (errs []error) {
-	newActivatedModules := make([]Module, 0)
+	newActivatedModules := make([]types.Module, 0)
 	for _, module := range activatedModules {
 		err := module.Destroy()
 		if err != nil {
@@ -65,8 +54,8 @@ func Destroy() (errs []error) {
 // After calling this method, Initialize should be called, in order to
 // initialize any new modules. If Initialize has already been called before,
 // Destroy should be called as well before Initialize.
-func SetModules(modules []Module) {
-	moduleList = make([]Module, len(modules))
+func SetModules(modules []types.Module) {
+	moduleList = make([]types.Module, len(modules))
 	copy(moduleList, modules)
 }
 
