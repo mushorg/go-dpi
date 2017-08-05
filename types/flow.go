@@ -4,9 +4,11 @@ package types
 import (
 	"fmt"
 	"github.com/google/gopacket"
+	"github.com/patrickmn/go-cache"
+	"time"
 )
 
-var flowTracker = make(map[gopacket.Flow]*Flow)
+var flowTracker *cache.Cache
 
 // ClassificationSource is the module of the library that is responsible for
 // the classification of a flow.
@@ -57,7 +59,6 @@ func (flow *Flow) AddPacket(packet *gopacket.Packet) {
 // the packet to that flow and returns the flow.
 // If no such flow is found, a new one is created.
 func GetFlowForPacket(packet *gopacket.Packet) (flow *Flow, isNew bool) {
-	var ok bool
 	isNew = true
 	if transport := (*packet).TransportLayer(); transport != nil {
 		gpktFlow := transport.TransportFlow()
@@ -68,13 +69,14 @@ func GetFlowForPacket(packet *gopacket.Packet) (flow *Flow, isNew bool) {
 		if dstEp.LessThan(srcEp) {
 			gpktFlow = gpktFlow.Reverse()
 		}
-		flow, ok = flowTracker[gpktFlow]
+		trackedFlow, ok := flowTracker.Get(gpktFlow.String())
 		if ok {
+			flow = trackedFlow.(*Flow)
 			isNew = false
 		} else {
 			flow = NewFlow()
-			flowTracker[gpktFlow] = flow
 		}
+		flowTracker.Set(gpktFlow.String(), flow, cache.DefaultExpiration)
 		flow.AddPacket(packet)
 	} else {
 		flow = CreateFlowFromPacket(packet)
@@ -85,5 +87,20 @@ func GetFlowForPacket(packet *gopacket.Packet) (flow *Flow, isNew bool) {
 // FlushTrackedFlows flushes the map used for tracking flows. Any new packets
 // that arrive after this operation will be considered new flows.
 func FlushTrackedFlows() {
-	flowTracker = make(map[gopacket.Flow]*Flow)
+	flowTracker.Flush()
+}
+
+// InitCache initializes the flow cache. It must be called before the cache
+// is utilised. Flows will be discarded if they are inactive for the given
+// duration. If that value is negative, flows will never expire.
+func InitCache(expirationTime time.Duration) {
+	flowTracker = cache.New(expirationTime, 5*time.Minute)
+}
+
+// DestroyCache frees the resources used by the flow cache.
+func DestroyCache() {
+	if flowTracker != nil {
+		flowTracker.Flush()
+		flowTracker = nil
+	}
 }

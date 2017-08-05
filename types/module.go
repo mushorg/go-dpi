@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/mushorg/go-dpi/utils"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"path"
 )
@@ -24,13 +25,14 @@ func BenchmarkModule(dumpsDir string, module Module) error {
 	if err != nil {
 		return err
 	}
-	FlushTrackedFlows()
+	InitCache(-1)
+	defer DestroyCache()
 	module.Initialize()
 	defer module.Destroy()
 	// gather all flows in all files
 	for _, fInfo := range files {
-		filepath := path.Join(dumpsDir, fInfo.Name())
-		dumpPackets, err := utils.ReadDumpFile(filepath)
+		filePath := path.Join(dumpsDir, fInfo.Name())
+		dumpPackets, err := utils.ReadDumpFile(filePath)
 		if err != nil {
 			return err
 		}
@@ -42,4 +44,51 @@ func BenchmarkModule(dumpsDir string, module Module) error {
 		}
 	}
 	return nil
+}
+
+// MockModule is used in tests in order to test the functionality of modules.
+type MockModule struct {
+	InitSuccess     bool
+	InitCalled      int
+	DestroySuccess  bool
+	DestroyCalled   int
+	ClassifySuccess bool
+	ClassifyCalled  int
+	SourceName      string
+}
+
+// Initialize logs the initialization of the mock module.
+func (module *MockModule) Initialize() error {
+	module.InitCalled++
+	if module.InitSuccess {
+		return nil
+	}
+	return errors.New("Init error")
+}
+
+// Destroy logs the destruction of the mock module.
+func (module *MockModule) Destroy() error {
+	module.DestroyCalled++
+	if module.DestroySuccess {
+		return nil
+	}
+	return errors.New("Destroy error")
+}
+
+// ClassifyFlow logs the classification by the mock module.
+func (module *MockModule) ClassifyFlow(flow *Flow) (result ClassificationResult) {
+	module.ClassifyCalled++
+	result.Source = ClassificationSource(module.SourceName)
+	if module.ClassifySuccess {
+		result.Protocol = HTTP
+	} else {
+		result.Protocol = Unknown
+	}
+	return
+}
+
+// ClassifyFlowAll logs the multiple classification by the mock module.
+func (module *MockModule) ClassifyFlowAll(flow *Flow) (results []ClassificationResult) {
+	results = append(results, module.ClassifyFlow(flow))
+	return
 }

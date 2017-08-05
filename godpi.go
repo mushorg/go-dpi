@@ -6,6 +6,7 @@ import (
 	"github.com/mushorg/go-dpi/modules/classifiers"
 	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
+	"time"
 )
 
 var activatedModules []types.Module
@@ -13,9 +14,11 @@ var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
 	wrappers.NewWrapperModule(),
 }
+var cacheExpiration = 5 * time.Minute
 
 // Initialize initializes the library and the selected modules.
 func Initialize() (errs []error) {
+	types.InitCache(cacheExpiration)
 	for _, module := range moduleList {
 		activated := false
 		for _, activeModule := range activatedModules {
@@ -38,6 +41,7 @@ func Initialize() (errs []error) {
 
 // Destroy frees all allocated resources and deactivates the active modules.
 func Destroy() (errs []error) {
+	types.DestroyCache()
 	newActivatedModules := make([]types.Module, 0)
 	for _, module := range activatedModules {
 		err := module.Destroy()
@@ -57,6 +61,16 @@ func Destroy() (errs []error) {
 func SetModules(modules []types.Module) {
 	moduleList = make([]types.Module, len(modules))
 	copy(moduleList, modules)
+}
+
+// SetCacheExpiration sets how long after being inactive flows should be
+// discarded from the flow tracker. If a negative value is passed, flows
+// will never expire. By default, this value is 5 minutes.
+// After calling this method, Initialize should be called, in order to
+// initialize the cache. If Initialize has already been called before,
+// Destroy should be called as well before Initialize.
+func SetCacheExpiration(expiration time.Duration) {
+	cacheExpiration = expiration
 }
 
 // GetPacketFlow returns a Flow for the given packet. If another packet has

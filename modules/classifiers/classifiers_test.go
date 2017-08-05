@@ -135,6 +135,8 @@ type protocolTestInfo struct {
 }
 
 func TestClassifiers(t *testing.T) {
+	types.InitCache(-1)
+	defer types.DestroyCache()
 	// test for each protocol the expected number of flows in the appropriate capture file
 	protocolInfos := []protocolTestInfo{
 		{types.HTTP, "../../godpi_example/dumps/http.cap", 2},

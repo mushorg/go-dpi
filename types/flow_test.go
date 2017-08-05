@@ -24,6 +24,8 @@ func TestCreateFlowFromPacket(t *testing.T) {
 }
 
 func TestGetFlowForPacket(t *testing.T) {
+	InitCache(-1)
+	defer DestroyCache()
 	flows := make([]*Flow, 0)
 	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
@@ -48,8 +50,8 @@ func TestGetFlowForPacket(t *testing.T) {
 }
 
 func TestFlushTrackedFlows(t *testing.T) {
-	// make sure there are no flows left from other tests
-	FlushTrackedFlows()
+	InitCache(-1)
+	defer DestroyCache()
 	dumpPackets, err := utils.ReadDumpFile("../godpi_example/dumps/http.cap")
 	if err != nil {
 		t.Fatal(err)
