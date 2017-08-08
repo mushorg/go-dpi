@@ -33,7 +33,7 @@ func TestClassifyFlow(t *testing.T) {
 		t.Error("ClassifyFlowAll didn't return one result")
 	}
 	if results[0] != result {
-		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
+		t.Errorf("ClassifyFlowAll returned a different result from Classify: %v", results[0])
 	}
 }
 
@@ -197,7 +197,7 @@ func TestConfigureModule(t *testing.T) {
 func TestInitDestroy(t *testing.T) {
 	module := NewClassifierModule()
 	if err := module.Initialize(); err != nil {
-		t.Errorf("Initalize returned error: %v", err)
+		t.Errorf("Initialize returned error: %v", err)
 	}
 	if err := module.Destroy(); err != nil {
 		t.Errorf("Destroy returned error: %v", err)

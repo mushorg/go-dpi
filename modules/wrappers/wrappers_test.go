@@ -92,7 +92,7 @@ func TestClassifyFlowInitialized(t *testing.T) {
 		t.Error("ClassifyFlowAll didn't return one result")
 	}
 	if results[0] != result {
-		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
+		t.Errorf("ClassifyFlowAll returned a different result from Classify: %v", results[0])
 	}
 	module.Destroy()
 	if !initialized.destroyCalled {
