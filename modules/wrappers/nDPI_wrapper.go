@@ -8,6 +8,7 @@ import "C"
 import (
 	"unsafe"
 
+	"github.com/google/gopacket"
 	"github.com/mushorg/go-dpi/types"
 	"github.com/pkg/errors"
 )
@@ -36,13 +37,30 @@ const NDPIWrapperName = "nDPI"
 type NDPIWrapperProvider struct {
 	ndpiInitialize    func() int32
 	ndpiDestroy       func()
-	ndpiPacketProcess func(int, int, int, []byte) int32
+	ndpiPacketProcess func(gopacket.Packet, unsafe.Pointer) int32
+	ndpiAllocFlow     func(gopacket.Packet) unsafe.Pointer
+	ndpiFreeFlow      func(unsafe.Pointer)
 }
 
 // NDPIWrapper is the wrapper for the nDPI deep inspection library,
 // providing the methods used to interface with it from go-dpi.
 type NDPIWrapper struct {
 	provider *NDPIWrapperProvider
+}
+
+// getPacketNdpiData is a helper that extracts the PCAP packet header and packet
+// data pointer from a gopacket.Packet, as needed by nDPI.
+func getPacketNdpiData(packet *gopacket.Packet) (pktHeader C.struct_pcap_pkthdr, pktDataPtr *C.u_char) {
+	seconds := (*packet).Metadata().Timestamp.Second()
+	capLen := (*packet).Metadata().CaptureLength
+	packetLen := (*packet).Metadata().Length
+	pktDataSlice := (*packet).Data()
+	pktHeader.ts.tv_sec = C.__time_t(seconds)
+	pktHeader.ts.tv_usec = 0
+	pktHeader.caplen = C.bpf_u_int32(capLen)
+	pktHeader.len = C.bpf_u_int32(packetLen)
+	pktDataPtr = (*C.u_char)(unsafe.Pointer(&pktDataSlice[0]))
+	return
 }
 
 // NewNDPIWrapper constructs an NDPIWrapper with the default implementation
@@ -52,14 +70,16 @@ func NewNDPIWrapper() *NDPIWrapper {
 		provider: &NDPIWrapperProvider{
 			ndpiInitialize: func() int32 { return int32(C.ndpiInitialize()) },
 			ndpiDestroy:    func() { C.ndpiDestroy() },
-			ndpiPacketProcess: func(seconds, capLen, packetLen int, pktData []byte) int32 {
-				var pktHeader C.struct_pcap_pkthdr
-				pktHeader.ts.tv_sec = C.__time_t(seconds)
-				pktHeader.ts.tv_usec = 0
-				pktHeader.caplen = C.bpf_u_int32(capLen)
-				pktHeader.len = C.bpf_u_int32(packetLen)
-				pktDataPtr := unsafe.Pointer(&pktData[0])
-				return int32(C.ndpiPacketProcess(&pktHeader, (*C.u_char)(pktDataPtr)))
+			ndpiPacketProcess: func(packet gopacket.Packet, ndpiFlow unsafe.Pointer) int32 {
+				pktHeader, pktDataPtr := getPacketNdpiData(&packet)
+				return int32(C.ndpiPacketProcess(&pktHeader, pktDataPtr, ndpiFlow))
+			},
+			ndpiAllocFlow: func(packet gopacket.Packet) unsafe.Pointer {
+				pktHeader, pktDataPtr := getPacketNdpiData(&packet)
+				return C.ndpiGetFlow(&pktHeader, pktDataPtr)
+			},
+			ndpiFreeFlow: func(ndpiFlow unsafe.Pointer) {
+				C.ndpiFreeFlow(ndpiFlow)
 			},
 		},
 	}
@@ -79,25 +99,24 @@ func (wrapper *NDPIWrapper) DestroyWrapper() error {
 // ClassifyFlow classifies a flow using the nDPI library. It returns the
 // detected protocol and any error.
 func (wrapper *NDPIWrapper) ClassifyFlow(flow *types.Flow) (types.Protocol, error) {
-	for _, ppacket := range flow.Packets {
-		packet := *ppacket
-		seconds := packet.Metadata().Timestamp.Second()
-		capLen := packet.Metadata().CaptureLength
-		packetLen := packet.Metadata().Length
-		pktDataSlice := packet.Data()
-		ndpiProto := (*wrapper.provider).ndpiPacketProcess(seconds, capLen, packetLen, pktDataSlice)
-		if proto, found := ndpiCodeToProtocol[uint32(ndpiProto)]; found {
-			return proto, nil
-		} else if ndpiProto < 0 {
-			switch ndpiProto {
-			case -10:
-				return types.Unknown, errors.New("nDPI wrapper does not support IPv6")
-			case -11:
-				return types.Unknown, errors.New("Received fragmented packet")
-			case -12:
-				return types.Unknown, errors.New("Error creating nDPI flow")
-			default:
-				return types.Unknown, errors.New("nDPI unknown error")
+	if len(flow.Packets) > 0 {
+		ndpiFlow := (*wrapper.provider).ndpiAllocFlow(*flow.Packets[0])
+		defer (*wrapper.provider).ndpiFreeFlow(ndpiFlow)
+		for _, ppacket := range flow.Packets {
+			ndpiProto := (*wrapper.provider).ndpiPacketProcess(*ppacket, ndpiFlow)
+			if proto, found := ndpiCodeToProtocol[uint32(ndpiProto)]; found {
+				return proto, nil
+			} else if ndpiProto < 0 {
+				switch ndpiProto {
+				case -10:
+					return types.Unknown, errors.New("nDPI wrapper does not support IPv6")
+				case -11:
+					return types.Unknown, errors.New("Received fragmented packet")
+				case -12:
+					return types.Unknown, errors.New("Error creating nDPI flow")
+				default:
+					return types.Unknown, errors.New("nDPI unknown error")
+				}
 			}
 		}
 	}

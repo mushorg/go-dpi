@@ -70,8 +70,8 @@ func SetModules(modules []Module) {
 	copy(moduleList, modules)
 }
 
-// GetPacketFlow returns a Flow for the given type. If another packet has been
-// processed before that was part of the same communication flow, the same
+// GetPacketFlow returns a Flow for the given packet. If another packet has
+// been processed before that was part of the same communication flow, the same
 // Flow will be returned, with the new packet added. Otherwise, a new Flow
 // will be created with only this packet.
 // The function also returns whether the returned Flow is a new one, and not

@@ -4,69 +4,76 @@
 
 # go-dpi
 
-go-dpi is an open source Go library for application layer protocol identification of traffic flows. In addition to its own heuristic methods, it contains wrappers for other popular and well-established libraries that also perform protocol identification, such as nDPI and libprotoident. It aims to provide a simple, easy-to-use interface and the capability to be easily extended by a developer with new detection methods and protocols.
+go-dpi is an open source Go library for application layer protocol identification of traffic flows. In addition to its own heuristic methods, it contains wrappers for other popular and well-established libraries that also perform protocol identification, such as nDPI and libprotoident. It aims to provide a simple, easy-to-use interface and the capability to be extended by a developer with new detection methods and protocols.
 
-It attempts to classify flows to different protocols regardless of the ports used. This makes it possible to detect protocols on non-standard ports, which is ideal for honeypots, as malware might often try and throw off detection methods by using non-standard and unregistered ports. Also, with its layered architecture, it aims to be fast in its detection, only using heavier classification methods when the simpler ones fail.
+It attempts to classify flows to different protocols regardless of the ports used. This makes it possible to detect protocols on non-standard ports, which is ideal for honeypots, as malware might often try and throw off detection methods by using non-standard and unregistered ports. Also, with its layered architecture, it aims to be fast in its detection, only using heavier classification methods when the faster ones fail.
 
 It is being developed in the context of the Google Summer of Code 2017 program, under the mentorship of The Honeynet Project.
 
 Please read the project's [Wiki page](https://github.com/mushorg/go-dpi/wiki) for more information.
 
+For documentation, please check out the [godoc reference](https://godoc.org/github.com/mushorg/go-dpi).
+
 ## Example usage
 
 The library and the modules APIs aim to be very simple and straightforward to use. The library relies on the [gopacket](https://godoc.org/github.com/google/gopacket) library and its Packet structure. Once you have a Packet in your hands, it's very easy to classify it with the library.
-First you need a flow that contains the packet. There is a helper function for constructing a flow from a single packet. Simply call:
-
+First of all you need to initialize the library. You can do that by calling:
 ```go
-flow := godpi.CreateFlowFromPacket(&packet)
+godpi.Initialize()
 ```
 
-Afterwards, classifying the flow can be done by simply calling:
+The `Initialize` method initializes all the selected modules in the library, by calling the `Initialize` method that they provide. It also creates the cache that is used to track the flows, which outdates unused flows after some minutes.
+
+Then, you need a flow that contains the packet. You can get the flow a packet belongs to with the following call:
 
 ```go
-proto, source := classifiers.ClassifyFlow(flow)
+flow, isNew := godpi.GetPacketFlow(&packet)
 ```
 
-This returns the guess protocol by the classifiers as well as the source (which in this case will always be go-dpi).
+That call returns the flow, as well as whether that flow is a new one (this packet is the first in the flow) or an existing one.
 
-The same thing applies for wrappers. However, for wrappers you also have to call the initialize function, and the destroy function before your program exits. All in all, the following is enough to run the wrappers:
+Afterwards, classifying the flow can be done by calling:
 
 ```go
-wrappers.InitializeWrappers()
-defer wrappers.DestroyWrappers()
-proto, source = wrappers.ClassifyFlow(flow)
+result := godpi.ClassifyFlow(flow)
 ```
 
-A minimal example application is included below. It uses both the classifiers and wrappers to classify a simple packet capture file. Note the helpful `godpi.ReadDumpFile` function that simply returns a channel with all the packets in the file.
+This returns the protocol guessed by the classifiers as well as the source, e.g. go-dpi or one of the wrappers.
+
+Finally, once you are done with the library, you should free the used resources by calling:
+
+```go
+godpi.Destroy()
+```
+
+`Destroy` frees all the resources that the library is using, and calls the `Destroy` method of all the activated modules. It is essentially the opposite of the `Initialize` method.
+
+A minimal example application is included below. It uses the library to classify a packet capture file, located at `/tmp/http.cap`. Note the helpful `godpi.ReadDumpFile` function that returns a channel with all the packets in the file.
 
 ```go
 package main
 
-import "fmt"
-import "github.com/mushorg/go-dpi"
-import "github.com/mushorg/go-dpi/classifiers"
-import "github.com/mushorg/go-dpi/wrappers"
+import (
+	"fmt"
+	"github.com/mushorg/go-dpi"
+	"github.com/mushorg/go-dpi/types"
+	"github.com/mushorg/go-dpi/utils"
+)
 
 func main() {
-	packets, err := godpi.ReadDumpFile("/tmp/http.cap")
-	wrappers.InitializeWrappers()
-	defer wrappers.DestroyWrappers()
+	godpi.Initialize()
+	defer godpi.Destroy()
+	packets, err := utils.ReadDumpFile("/tmp/http.cap")
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		for packet := range packets {
-			flow := godpi.CreateFlowFromPacket(&packet)
-			proto, source := classifiers.ClassifyFlow(flow)
-			if proto != godpi.Unknown {
-				fmt.Println(source, "detected protocol", proto)
+			flow, _ := godpi.GetPacketFlow(&packet)
+			result := godpi.ClassifyFlow(flow)
+			if result.Protocol != types.Unknown {
+				fmt.Println(result.Source, "detected protocol", result.Protocol)
 			} else {
-				fmt.Println("No detection made by classifiers")
-			}
-			proto, source = wrappers.ClassifyFlow(flow)
-			if proto != godpi.Unknown {
-				fmt.Println(source, "detected protocol", proto)
-			} else {
-				fmt.Println("No detection made by wrappers")
+				fmt.Println("No detection was made")
 			}
 		}
 	}
