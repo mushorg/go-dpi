@@ -126,7 +126,7 @@ func TestWrapperLibraryDisabled(t *testing.T) {
 
 func BenchmarkWrapperModule(b *testing.B) {
 	module := NewWrapperModule()
-	err := types.BenchmarkModule("../../godpi_example/dumps/", module)
+	err := types.BenchmarkModule("../../godpi_example/dumps/", module, b.N)
 	if err != nil {
 		b.Error(err)
 	}

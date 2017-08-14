@@ -206,7 +206,7 @@ func TestInitDestroy(t *testing.T) {
 
 func BenchmarkClassifierModule(b *testing.B) {
 	module := NewClassifierModule()
-	err := types.BenchmarkModule("../../godpi_example/dumps/", module)
+	err := types.BenchmarkModule("../../godpi_example/dumps/", module, b.N)
 	if err != nil {
 		b.Error(err)
 	}

@@ -20,7 +20,7 @@ type Module interface {
 
 // BenchmarkModule runs a module on all available dump files. It is used
 // for benchmarking the modules.
-func BenchmarkModule(dumpsDir string, module Module) error {
+func BenchmarkModule(dumpsDir string, module Module, times int) error {
 	files, err := ioutil.ReadDir(dumpsDir)
 	if err != nil {
 		return err
@@ -29,17 +29,19 @@ func BenchmarkModule(dumpsDir string, module Module) error {
 	defer DestroyCache()
 	module.Initialize()
 	defer module.Destroy()
-	// gather all flows in all files
-	for _, fInfo := range files {
-		filePath := path.Join(dumpsDir, fInfo.Name())
-		dumpPackets, err := utils.ReadDumpFile(filePath)
-		if err != nil {
-			return err
-		}
-		for p := range dumpPackets {
-			flow, _ := GetFlowForPacket(&p)
-			if flow.DetectedProtocol == Unknown {
-				module.ClassifyFlow(flow)
+	for i := 0; i < times; i++ {
+		// gather all flows in all files
+		for _, fInfo := range files {
+			filePath := path.Join(dumpsDir, fInfo.Name())
+			dumpPackets, err := utils.ReadDumpFile(filePath)
+			if err != nil {
+				return err
+			}
+			for p := range dumpPackets {
+				flow, _ := GetFlowForPacket(&p)
+				if flow.DetectedProtocol == Unknown {
+					module.ClassifyFlow(flow)
+				}
 			}
 		}
 	}

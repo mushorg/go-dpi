@@ -3,6 +3,8 @@ package godpi
 import (
 	"github.com/mushorg/go-dpi/types"
 	"github.com/mushorg/go-dpi/utils"
+	"io/ioutil"
+	"path"
 	"testing"
 )
 
@@ -120,5 +122,31 @@ func TestSetCacheExpiration(t *testing.T) {
 	SetCacheExpiration(-1)
 	if cacheExpiration != -1 {
 		t.Errorf("Cache expiration not set: expected -1, found %v", cacheExpiration)
+	}
+}
+
+func BenchmarkClassifyFlow(b *testing.B) {
+	dumpsDir := "./godpi_example/dumps/"
+	files, err := ioutil.ReadDir(dumpsDir)
+	if err != nil {
+		b.Fatal(err)
+	}
+	Initialize()
+	defer Destroy()
+	// gather all flows in all files
+	for i := 0; i < b.N; i++ {
+		for _, fInfo := range files {
+			filePath := path.Join(dumpsDir, fInfo.Name())
+			dumpPackets, err := utils.ReadDumpFile(filePath)
+			if err != nil {
+				b.Error(err)
+			}
+			for p := range dumpPackets {
+				flow, _ := GetPacketFlow(&p)
+				if flow.DetectedProtocol == types.Unknown {
+					ClassifyFlow(flow)
+				}
+			}
+		}
 	}
 }
