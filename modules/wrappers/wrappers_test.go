@@ -92,7 +92,7 @@ func TestClassifyFlowInitialized(t *testing.T) {
 		t.Error("ClassifyFlowAll didn't return one result")
 	}
 	if results[0] != result {
-		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
+		t.Errorf("ClassifyFlowAll returned a different result from Classify: %v", results[0])
 	}
 	module.Destroy()
 	if !initialized.destroyCalled {
@@ -121,5 +121,13 @@ func TestWrapperLibraryDisabled(t *testing.T) {
 	module.Destroy()
 	if disabled.destroyCalled {
 		t.Error("Destroy called on disabled wrapper")
+	}
+}
+
+func BenchmarkWrapperModule(b *testing.B) {
+	module := NewWrapperModule()
+	err := types.BenchmarkModule("../../godpi_example/dumps/", module, b.N)
+	if err != nil {
+		b.Error(err)
 	}
 }

@@ -33,7 +33,7 @@ func TestClassifyFlow(t *testing.T) {
 		t.Error("ClassifyFlowAll didn't return one result")
 	}
 	if results[0] != result {
-		t.Errorf("ClassifyFlowAll returned a differnt result from Classify: %v", results[0])
+		t.Errorf("ClassifyFlowAll returned a different result from Classify: %v", results[0])
 	}
 }
 
@@ -135,6 +135,8 @@ type protocolTestInfo struct {
 }
 
 func TestClassifiers(t *testing.T) {
+	types.InitCache(-1)
+	defer types.DestroyCache()
 	// test for each protocol the expected number of flows in the appropriate capture file
 	protocolInfos := []protocolTestInfo{
 		{types.HTTP, "../../godpi_example/dumps/http.cap", 2},
@@ -195,9 +197,17 @@ func TestConfigureModule(t *testing.T) {
 func TestInitDestroy(t *testing.T) {
 	module := NewClassifierModule()
 	if err := module.Initialize(); err != nil {
-		t.Errorf("Initalize returned error: %v", err)
+		t.Errorf("Initialize returned error: %v", err)
 	}
 	if err := module.Destroy(); err != nil {
 		t.Errorf("Destroy returned error: %v", err)
+	}
+}
+
+func BenchmarkClassifierModule(b *testing.B) {
+	module := NewClassifierModule()
+	err := types.BenchmarkModule("../../godpi_example/dumps/", module, b.N)
+	if err != nil {
+		b.Error(err)
 	}
 }

@@ -1,11 +1,13 @@
-hash: 6444fe2402f2485da4d8131ce7021d1423bc9ab2dfa98bc341f36b0a1d0d49f9
-updated: 2017-06-09T18:46:00.365696749+02:00
+hash: cdb2775ddff1fbe48b5458722ba4e6b125c0257320e9e2d9a2215dd32269b824
+updated: 2017-08-05T15:10:14.192912857+03:00
 imports:
 - name: github.com/google/gopacket
   version: b83f94714c36e30ce851be1d5a0a5226f9f1bca4
   subpackages:
   - layers
   - pcap
+- name: github.com/patrickmn/go-cache
+  version: 1881a9bccb818787f68c52bfba648c6cf34c34fa
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 testImports: []

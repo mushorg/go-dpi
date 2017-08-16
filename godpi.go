@@ -6,27 +6,19 @@ import (
 	"github.com/mushorg/go-dpi/modules/classifiers"
 	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
+	"time"
 )
 
-// Module is implemented by every classification module provided by the
-// library. Each module has its own initialization and destruction methods,
-// as well as their own method for classifying a flow. They may also be
-// enabled or disabled and usually will also provide a configuration method.
-type Module interface {
-	Initialize() error
-	Destroy() error
-	ClassifyFlow(*types.Flow) types.ClassificationResult
-	ClassifyFlowAll(*types.Flow) []types.ClassificationResult
-}
-
-var activatedModules []Module
-var moduleList = []Module{
+var activatedModules []types.Module
+var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
 	wrappers.NewWrapperModule(),
 }
+var cacheExpiration = 5 * time.Minute
 
 // Initialize initializes the library and the selected modules.
 func Initialize() (errs []error) {
+	types.InitCache(cacheExpiration)
 	for _, module := range moduleList {
 		activated := false
 		for _, activeModule := range activatedModules {
@@ -49,7 +41,8 @@ func Initialize() (errs []error) {
 
 // Destroy frees all allocated resources and deactivates the active modules.
 func Destroy() (errs []error) {
-	newActivatedModules := make([]Module, 0)
+	types.DestroyCache()
+	newActivatedModules := make([]types.Module, 0)
 	for _, module := range activatedModules {
 		err := module.Destroy()
 		if err != nil {
@@ -65,9 +58,19 @@ func Destroy() (errs []error) {
 // After calling this method, Initialize should be called, in order to
 // initialize any new modules. If Initialize has already been called before,
 // Destroy should be called as well before Initialize.
-func SetModules(modules []Module) {
-	moduleList = make([]Module, len(modules))
+func SetModules(modules []types.Module) {
+	moduleList = make([]types.Module, len(modules))
 	copy(moduleList, modules)
+}
+
+// SetCacheExpiration sets how long after being inactive flows should be
+// discarded from the flow tracker. If a negative value is passed, flows
+// will never expire. By default, this value is 5 minutes.
+// After calling this method, Initialize should be called, in order to
+// initialize the cache. If Initialize has already been called before,
+// Destroy should be called as well before Initialize.
+func SetCacheExpiration(expiration time.Duration) {
+	cacheExpiration = expiration
 }
 
 // GetPacketFlow returns a Flow for the given packet. If another packet has

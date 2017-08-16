@@ -25,13 +25,19 @@ func TestNDPIWrapperClassification(t *testing.T) {
 	}
 
 	wrapper := NewNDPIWrapper()
-	wrapper.InitializeWrapper()
-	result, err := wrapper.ClassifyFlow(flow)
-	wrapper.DestroyWrapper()
-
-	if result != types.HTTP || err != nil {
-		t.Errorf("Incorrectly detected flow protocol: %v instead of HTTP", result)
+	switch errCode := wrapper.InitializeWrapper(); errCode {
+	case 0:
+		defer wrapper.DestroyWrapper()
+		result, err := wrapper.ClassifyFlow(flow)
+		if result != types.HTTP || err != nil {
+			t.Errorf("Incorrectly detected flow protocol: %v instead of HTTP", result)
+		}
+	case errorLibraryDisabled:
+		// do nothing if library is disabled
+	default:
+		t.Error("nDPI initialization returned error code:", errCode)
 	}
+
 }
 
 func TestNDPIWrapper_InitializeWrapper(t *testing.T) {
