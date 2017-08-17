@@ -1,7 +1,7 @@
 FROM golang:1.7.4
 RUN echo "deb http://packages.wand.net.nz trusty main" | tee -a /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get -y --force-yes install autoconf automake libtool git libpcap-dev libtrace4 libtrace4-dev libprotoident libprotoident-dev
+RUN apt-get -y --force-yes install autoconf automake libtool git libpcap-dev libtrace4 libtrace4-dev libprotoident libprotoident-dev liblinear1 liblinear-dev
 RUN go get github.com/Masterminds/glide
 RUN git clone --branch 2.0-stable https://github.com/ntop/nDPI/ /tmp/nDPI
 RUN cd /tmp/nDPI && ./autogen.sh && ./configure && make && make install && cd -

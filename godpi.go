@@ -4,6 +4,7 @@ package godpi
 import (
 	"github.com/google/gopacket"
 	"github.com/mushorg/go-dpi/modules/classifiers"
+	"github.com/mushorg/go-dpi/modules/ml"
 	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
 	"time"
@@ -13,6 +14,7 @@ var activatedModules []types.Module
 var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
 	wrappers.NewWrapperModule(),
+	ml.NewLinearSVCModule(),
 }
 var cacheExpiration = 5 * time.Minute
 
