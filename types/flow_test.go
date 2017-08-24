@@ -10,7 +10,7 @@ import (
 
 func TestNewFlow(t *testing.T) {
 	flow := NewFlow()
-	if len(flow.Packets) != 0 {
+	if len(flow.GetPackets()) != 0 {
 		t.Error("New flow is not empty")
 	}
 }
@@ -18,7 +18,8 @@ func TestNewFlow(t *testing.T) {
 func TestCreateFlowFromPacket(t *testing.T) {
 	packet := gopacket.NewPacket([]byte{}, layers.LayerTypeEthernet, gopacket.DecodeOptions{})
 	flow := CreateFlowFromPacket(&packet)
-	if len(flow.Packets) != 1 || *flow.Packets[0] != packet {
+	packets := flow.GetPackets()
+	if len(packets) != 1 || *packets[0] != packet {
 		t.Error("Flow doesn't have only the given packet")
 	}
 }
@@ -43,7 +44,7 @@ func TestGetFlowForPacket(t *testing.T) {
 	}
 	packetCounts := [3]int{34, 2, 7}
 	for flowIdx, expectedCount := range packetCounts {
-		if count := len(flows[flowIdx].Packets); count != expectedCount {
+		if count := len(flows[flowIdx].GetPackets()); count != expectedCount {
 			t.Errorf("Wrong number of packets in flow: %d instead of %d", count, expectedCount)
 		}
 	}

@@ -22,10 +22,11 @@ func TestClassifyFlow(t *testing.T) {
 	packet := <-dumpPackets
 	flow := types.CreateFlowFromPacket(&packet)
 	result := module.ClassifyFlow(flow)
-	if result.Protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
+	flowCls := flow.GetClassificationResult()
+	if result.Protocol != types.HTTP || flowCls.Protocol != types.HTTP {
 		t.Error("Wrong protocol detected:", result.Protocol)
 	}
-	if name := flow.ClassificationSource; name != GoDPIName || result.Source != GoDPIName {
+	if name := flowCls.Source; name != GoDPIName || result.Source != GoDPIName {
 		t.Error("Wrong classification source returned:", name)
 	}
 	results := module.ClassifyFlowAll(flow)
@@ -89,7 +90,7 @@ func TestCheckFirstPayload(t *testing.T) {
 	}
 
 	called := false
-	noDetections := checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+	noDetections := checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []*gopacket.Packet) bool {
 			called = true
 			if payload == nil || len(payload) == 0 {
@@ -120,7 +121,7 @@ func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
 	}
 	for packet := range packets {
 		flow, _ := types.GetFlowForPacket(&packet)
-		if flow.DetectedProtocol == types.Unknown {
+		if flow.GetClassificationResult().Protocol == types.Unknown {
 			res := module.ClassifyFlow(flow)
 			result[res.Protocol]++
 		}

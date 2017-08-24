@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"github.com/google/gopacket"
 	"github.com/patrickmn/go-cache"
+	"sync"
 	"time"
 )
 
 var flowTracker *cache.Cache
+var flowTrackerMtx sync.Mutex
 
 // ClassificationSource is the module of the library that is responsible for
 // the classification of a flow.
@@ -30,15 +32,15 @@ const NoSource = ""
 
 // Flow contains sufficient information to classify a flow.
 type Flow struct {
-	Packets              []*gopacket.Packet
-	DetectedProtocol     Protocol
-	ClassificationSource ClassificationSource
+	packets        []*gopacket.Packet
+	classification ClassificationResult
+	mtx            sync.RWMutex
 }
 
 // NewFlow creates an empty flow.
 func NewFlow() (flow *Flow) {
 	flow = new(Flow)
-	flow.Packets = make([]*gopacket.Packet, 0)
+	flow.packets = make([]*gopacket.Packet, 0)
 	return
 }
 
@@ -52,7 +54,35 @@ func CreateFlowFromPacket(packet *gopacket.Packet) (flow *Flow) {
 // AddPacket adds a new packet to the flow.
 func (flow *Flow) AddPacket(packet *gopacket.Packet) {
 	newPacket := *packet
-	flow.Packets = append(flow.Packets, &newPacket)
+	flow.mtx.Lock()
+	flow.packets = append(flow.packets, &newPacket)
+	flow.mtx.Unlock()
+}
+
+// GetPackets returns the list of packets in a thread-safe way.
+func (flow *Flow) GetPackets() (packets []*gopacket.Packet) {
+	flow.mtx.RLock()
+	packets = make([]*gopacket.Packet, len(flow.packets))
+	copy(packets, flow.packets)
+	flow.mtx.RUnlock()
+	return
+}
+
+// SetClassificationResult sets the detected protocol and classification source
+// for this flow.
+func (flow *Flow) SetClassificationResult(protocol Protocol, source ClassificationSource) {
+	flow.mtx.Lock()
+	flow.classification = ClassificationResult{Protocol: protocol, Source: source}
+	flow.mtx.Unlock()
+}
+
+// GetClassificationResult returns the currently detected protocol for this
+// flow and the source of that detection.
+func (flow *Flow) GetClassificationResult() (result ClassificationResult) {
+	flow.mtx.RLock()
+	result = flow.classification
+	flow.mtx.RUnlock()
+	return
 }
 
 // GetFlowForPacket finds any previous flow that the packet belongs to. It adds
@@ -69,6 +99,9 @@ func GetFlowForPacket(packet *gopacket.Packet) (flow *Flow, isNew bool) {
 		if dstEp.LessThan(srcEp) {
 			gpktFlow = gpktFlow.Reverse()
 		}
+		// make sure two simultaneous calls with the same flow string do not
+		// create a race condition
+		flowTrackerMtx.Lock()
 		trackedFlow, ok := flowTracker.Get(gpktFlow.String())
 		if ok {
 			flow = trackedFlow.(*Flow)
@@ -77,6 +110,7 @@ func GetFlowForPacket(packet *gopacket.Packet) (flow *Flow, isNew bool) {
 			flow = NewFlow()
 		}
 		flowTracker.Set(gpktFlow.String(), flow, cache.DefaultExpiration)
+		flowTrackerMtx.Unlock()
 		flow.AddPacket(packet)
 	} else {
 		flow = CreateFlowFromPacket(packet)

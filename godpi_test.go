@@ -143,7 +143,7 @@ func BenchmarkClassifyFlow(b *testing.B) {
 			}
 			for p := range dumpPackets {
 				flow, _ := GetPacketFlow(&p)
-				if flow.DetectedProtocol == types.Unknown {
+				if flow.GetClassificationResult().Protocol == types.Unknown {
 					ClassifyFlow(flow)
 				}
 			}

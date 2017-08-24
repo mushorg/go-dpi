@@ -78,13 +78,14 @@ func TestClassifyFlowInitialized(t *testing.T) {
 		t.Error("Initialize not called on wrapper")
 	}
 	result := module.ClassifyFlow(flow)
+	flowCls := flow.GetClassificationResult()
 	if !initialized.classifyCalled {
 		t.Error("Classify not called on active wrapper")
 	}
-	if result.Protocol != types.HTTP || flow.DetectedProtocol != types.HTTP {
+	if result.Protocol != types.HTTP || flowCls.Protocol != types.HTTP {
 		t.Error("Classify did not return correct result")
 	}
-	if result.Source != "mock" || flow.ClassificationSource != "mock" {
+	if result.Source != "mock" || flowCls.Source != "mock" {
 		t.Error("Classify did not return correct result")
 	}
 	results := module.ClassifyFlowAll(flow)

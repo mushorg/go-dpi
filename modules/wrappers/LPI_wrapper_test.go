@@ -17,7 +17,7 @@ func TestLPIWrapperClassifyFlow(t *testing.T) {
 		flow := types.NewFlow()
 		for i := 0; i < 3; i++ {
 			packet := <-packetChan
-			flow.Packets = append(flow.Packets, &packet)
+			flow.AddPacket(&packet)
 		}
 
 		// first three packets should not be enough to classify the flow
@@ -27,7 +27,7 @@ func TestLPIWrapperClassifyFlow(t *testing.T) {
 
 		flow = types.NewFlow()
 		packet := <-packetChan
-		flow.Packets = append(flow.Packets, &packet)
+		flow.AddPacket(&packet)
 
 		// fourth packet should be HTTP
 		if result, _ := wrapper.ClassifyFlow(flow); result != types.HTTP {

@@ -12,7 +12,7 @@ type FTPClassifier struct{}
 
 // HeuristicClassify for FTPClassifier
 func (classifier FTPClassifier) HeuristicClassify(flow *types.Flow) bool {
-	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []*gopacket.Packet) bool {
 			payloadStr := string(payload)
 			for _, line := range strings.Split(payloadStr, "\n") {

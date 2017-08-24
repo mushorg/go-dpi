@@ -76,8 +76,7 @@ func (module *ClassifierModule) ClassifyFlow(flow *types.Flow) (result types.Cla
 			if heuristic.HeuristicClassify(flow) {
 				result.Protocol = classifier.GetProtocol()
 				result.Source = GoDPIName
-				flow.DetectedProtocol = result.Protocol
-				flow.ClassificationSource = result.Source
+				flow.SetClassificationResult(result.Protocol, result.Source)
 				break
 			}
 		}
@@ -104,7 +103,7 @@ func (module *ClassifierModule) ConfigureModule(config ClassifierModuleConfig) {
 // packet in the flow for which the check function returns true.
 func checkFlowLayer(flow *types.Flow, layerType gopacket.LayerType,
 	checkFunc func(layer gopacket.Layer) bool) bool {
-	for _, packet := range flow.Packets {
+	for _, packet := range flow.GetPackets() {
 		if layer := (*packet).Layer(layerType); layer != nil {
 			if checkFunc(layer) {
 				return true

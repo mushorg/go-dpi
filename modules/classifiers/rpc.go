@@ -13,7 +13,7 @@ type RPCClassifier struct{}
 
 // HeuristicClassify for RPCClassifier
 func (classifier RPCClassifier) HeuristicClassify(flow *types.Flow) bool {
-	return checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []*gopacket.Packet) bool {
 			if len(payload) < 24 {
 				return false
