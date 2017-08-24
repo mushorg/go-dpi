@@ -48,23 +48,15 @@ var detectedProtos = [...]types.Protocol{
 // that were encountered.
 func loadModelFromPath(modelPath string) (*C.struct_model, error) {
 	var modelFilePath string
+	var err error
 	if strings.HasPrefix(modelPath, "http://") || strings.HasPrefix(modelPath, "https://") {
 		// try to fetch file from URL
-		resp, err := http.Get(modelPath)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		// create temp file to store model
-		tmpFile, err := ioutil.TempFile("", "liblinear_model")
-		if err != nil {
-			return nil, err
-		}
-		defer os.Remove(tmpFile.Name())
-		defer tmpFile.Close()
-		io.Copy(tmpFile, resp.Body)
 		// the file path to the model is the path of the temp file
-		modelFilePath = tmpFile.Name()
+		modelFilePath, err = DownloadFileToTemp(modelPath, "liblinear_model")
+		if err != nil {
+			return nil, err
+		}
+		defer os.Remove(modelFilePath)
 	} else {
 		// if it's not a URL, it must be a local file path
 		modelFilePath = modelPath
@@ -74,6 +66,25 @@ func loadModelFromPath(modelPath string) (*C.struct_model, error) {
 		return nil, errors.New("Model could not be loaded: " + modelPath)
 	}
 	return model, nil
+}
+
+// DownloadFileToTemp downloads a file from a URL to a temporary file and
+// returns the temporary file's path, or an error. The temporary file's name
+// will have the given prefix.
+func DownloadFileToTemp(url, tmpPrefix string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	// create temp file to store model
+	tmpFile, err := ioutil.TempFile("", tmpPrefix)
+	if err != nil {
+		return "", err
+	}
+	defer tmpFile.Close()
+	io.Copy(tmpFile, resp.Body)
+	return tmpFile.Name(), nil
 }
 
 // Initialize loads the files that contain the SVC models used for classification.
