@@ -99,10 +99,11 @@ func (wrapper *NDPIWrapper) DestroyWrapper() error {
 // ClassifyFlow classifies a flow using the nDPI library. It returns the
 // detected protocol and any error.
 func (wrapper *NDPIWrapper) ClassifyFlow(flow *types.Flow) (types.Protocol, error) {
-	if len(flow.Packets) > 0 {
-		ndpiFlow := (*wrapper.provider).ndpiAllocFlow(*flow.Packets[0])
+	packets := flow.GetPackets()
+	if len(packets) > 0 {
+		ndpiFlow := (*wrapper.provider).ndpiAllocFlow(*packets[0])
 		defer (*wrapper.provider).ndpiFreeFlow(ndpiFlow)
-		for _, ppacket := range flow.Packets {
+		for _, ppacket := range packets {
 			ndpiProto := (*wrapper.provider).ndpiPacketProcess(*ppacket, ndpiFlow)
 			if proto, found := ndpiCodeToProtocol[uint32(ndpiProto)]; found {
 				return proto, nil

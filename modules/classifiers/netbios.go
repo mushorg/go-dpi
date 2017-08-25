@@ -43,15 +43,16 @@ func checkUDPNetBIOSWrapper(isFirstPktBroadcast *bool) func([]byte, []*gopacket.
 // HeuristicClassify for NetBIOSClassifier
 func (classifier NetBIOSClassifier) HeuristicClassify(flow *types.Flow) bool {
 	var isFirstPktBroadcast bool
-	if len(flow.Packets) > 0 {
-		if layer := (*flow.Packets[0]).Layer(layers.LayerTypeIPv4); layer != nil {
+	packets := flow.GetPackets()
+	if len(packets) > 0 {
+		if layer := (*packets[0]).Layer(layers.LayerTypeIPv4); layer != nil {
 			ipLayer := layer.(*layers.IPv4)
 			isFirstPktBroadcast = ipLayer.DstIP[3] == 0xFF
 		}
 	}
-	isNetbiosTCP := checkFirstPayload(flow.Packets, layers.LayerTypeTCP,
+	isNetbiosTCP := checkFirstPayload(packets, layers.LayerTypeTCP,
 		checkTCPNetBIOS)
-	isNetbiosUDP := checkFirstPayload(flow.Packets, layers.LayerTypeUDP,
+	isNetbiosUDP := checkFirstPayload(packets, layers.LayerTypeUDP,
 		checkUDPNetBIOSWrapper(&isFirstPktBroadcast))
 	return isNetbiosTCP || isNetbiosUDP
 }

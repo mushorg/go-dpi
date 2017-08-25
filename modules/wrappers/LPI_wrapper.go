@@ -58,7 +58,7 @@ func (wrapper *LPIWrapper) DestroyWrapper() error {
 func (wrapper *LPIWrapper) ClassifyFlow(flow *types.Flow) (types.Protocol, error) {
 	lpiFlow := C.lpiCreateFlow()
 	defer C.lpiFreeFlow(lpiFlow)
-	for _, packet := range flow.Packets {
+	for _, packet := range flow.GetPackets() {
 		pktData := (*packet).Data()
 		dataPtr := unsafe.Pointer(&pktData[0])
 		C.lpiAddPacketToFlow(lpiFlow, dataPtr, C.ushort(len(pktData)))

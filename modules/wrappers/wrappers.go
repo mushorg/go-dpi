@@ -92,8 +92,7 @@ func (module *WrapperModule) ClassifyFlow(flow *types.Flow) (result types.Classi
 		if proto, err := wrapper.ClassifyFlow(flow); proto != types.Unknown && err == nil {
 			result.Protocol = proto
 			result.Source = wrapper.GetWrapperName()
-			flow.DetectedProtocol = result.Protocol
-			flow.ClassificationSource = result.Source
+			flow.SetClassificationResult(result.Protocol, result.Source)
 			return
 		}
 	}
@@ -108,8 +107,7 @@ func (module *WrapperModule) ClassifyFlowAll(flow *types.Flow) (results []types.
 			var result types.ClassificationResult
 			result.Protocol = proto
 			result.Source = wrapper.GetWrapperName()
-			flow.DetectedProtocol = result.Protocol
-			flow.ClassificationSource = result.Source
+			flow.SetClassificationResult(result.Protocol, result.Source)
 			results = append(results, result)
 		}
 	}
