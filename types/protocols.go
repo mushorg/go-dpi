@@ -16,5 +16,6 @@ const (
 	FTP     Protocol = "FTP"
 	SSL     Protocol = "SSL"
 	NetBIOS Protocol = "NetBIOS"
+	JABBER Protocol = "JABBER"
 	Unknown Protocol = ""
 )
