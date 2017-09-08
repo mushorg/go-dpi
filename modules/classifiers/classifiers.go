@@ -54,7 +54,6 @@ func NewClassifierModule() *ClassifierModule {
 		SSHClassifier{},
 		SSLClassifier{},
                 JABBERClassifier{},
-
 	}
 	return module
 }
