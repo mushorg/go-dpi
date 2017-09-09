@@ -28,6 +28,7 @@ var lpiCodeToProtocol = map[uint32]types.Protocol{
 	27:  types.FTP,     // LPI_PROTO_FTP_CONTROL
 	12:  types.SSL,     // LPI_PROTO_SSL
 	37:  types.NetBIOS, // LPI_PROTO_NETBIOS
+	100: types.JABBER,  // LPI_PROTO_XMPP
 }
 
 // LPIWrapperName is the identification of the libprotoident library.
