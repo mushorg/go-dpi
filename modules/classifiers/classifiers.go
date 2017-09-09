@@ -53,7 +53,7 @@ func NewClassifierModule() *ClassifierModule {
 		SMTPClassifier{},
 		SSHClassifier{},
 		SSLClassifier{},
-                JABBERClassifier{},
+		JABBERClassifier{},
 	}
 	return module
 }
