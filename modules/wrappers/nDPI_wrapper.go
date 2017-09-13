@@ -28,6 +28,7 @@ var ndpiCodeToProtocol = map[uint32]types.Protocol{
 	64:  types.SSL,     // NDPI_PROTOCOL_SSL_NO_CERT
 	10:  types.NetBIOS, // NDPI_PROTOCOL_NETBIOS
 	67:  types.JABBER,  // NDPI_PROTOCOL_UNENCRYPTED_JABBER
+	222: types.MQTT,    // NDPI_PROTOCOL_MQTT
 }
 
 // NDPIWrapperName is the identification of the nDPI library.
