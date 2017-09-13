@@ -154,6 +154,7 @@ func TestClassifiers(t *testing.T) {
 		{types.SMTP, "../../godpi_example/dumps/smtp.pcap", 1},
 		{types.FTP, "../../godpi_example/dumps/ftp.pcap", 1},
 		{types.JABBER, "../../godpi_example/dumps/jabber.pcap", 1},
+		{types.MQTT, "../../godpi_example/dumps/mqtt.pcap", 2},
 	}
 	for _, info := range protocolInfos {
 		count := getPcapDumpProtoMap(info.filename)[info.protocol]
