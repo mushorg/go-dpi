@@ -17,5 +17,6 @@ const (
 	SSL     Protocol = "SSL"
 	NetBIOS Protocol = "NetBIOS"
 	JABBER  Protocol = "JABBER"
+	MQTT    Protocol = "MQTT"
 	Unknown Protocol = ""
 )
