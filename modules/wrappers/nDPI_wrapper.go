@@ -52,11 +52,11 @@ type NDPIWrapper struct {
 
 // getPacketNdpiData is a helper that extracts the PCAP packet header and packet
 // data pointer from a gopacket.Packet, as needed by nDPI.
-func getPacketNdpiData(packet *gopacket.Packet) (pktHeader C.struct_pcap_pkthdr, pktDataPtr *C.u_char) {
-	seconds := (*packet).Metadata().Timestamp.Second()
-	capLen := (*packet).Metadata().CaptureLength
-	packetLen := (*packet).Metadata().Length
-	pktDataSlice := (*packet).Data()
+func getPacketNdpiData(packet gopacket.Packet) (pktHeader C.struct_pcap_pkthdr, pktDataPtr *C.u_char) {
+	seconds := packet.Metadata().Timestamp.Second()
+	capLen := packet.Metadata().CaptureLength
+	packetLen := packet.Metadata().Length
+	pktDataSlice := packet.Data()
 	pktHeader.ts.tv_sec = C.__time_t(seconds)
 	pktHeader.ts.tv_usec = 0
 	pktHeader.caplen = C.bpf_u_int32(capLen)
@@ -73,11 +73,11 @@ func NewNDPIWrapper() *NDPIWrapper {
 			ndpiInitialize: func() int32 { return int32(C.ndpiInitialize()) },
 			ndpiDestroy:    func() { C.ndpiDestroy() },
 			ndpiPacketProcess: func(packet gopacket.Packet, ndpiFlow unsafe.Pointer) int32 {
-				pktHeader, pktDataPtr := getPacketNdpiData(&packet)
+				pktHeader, pktDataPtr := getPacketNdpiData(packet)
 				return int32(C.ndpiPacketProcess(&pktHeader, pktDataPtr, ndpiFlow))
 			},
 			ndpiAllocFlow: func(packet gopacket.Packet) unsafe.Pointer {
-				pktHeader, pktDataPtr := getPacketNdpiData(&packet)
+				pktHeader, pktDataPtr := getPacketNdpiData(packet)
 				return C.ndpiGetFlow(&pktHeader, pktDataPtr)
 			},
 			ndpiFreeFlow: func(ndpiFlow unsafe.Pointer) {
@@ -103,10 +103,10 @@ func (wrapper *NDPIWrapper) DestroyWrapper() error {
 func (wrapper *NDPIWrapper) ClassifyFlow(flow *types.Flow) (types.Protocol, error) {
 	packets := flow.GetPackets()
 	if len(packets) > 0 {
-		ndpiFlow := (*wrapper.provider).ndpiAllocFlow(*packets[0])
+		ndpiFlow := (*wrapper.provider).ndpiAllocFlow(packets[0])
 		defer (*wrapper.provider).ndpiFreeFlow(ndpiFlow)
 		for _, ppacket := range packets {
-			ndpiProto := (*wrapper.provider).ndpiPacketProcess(*ppacket, ndpiFlow)
+			ndpiProto := (*wrapper.provider).ndpiPacketProcess(ppacket, ndpiFlow)
 			if proto, found := ndpiCodeToProtocol[uint32(ndpiProto)]; found {
 				return proto, nil
 			} else if ndpiProto < 0 {

@@ -13,7 +13,7 @@ type SSLClassifier struct{}
 // HeuristicClassify for SSLClassifier
 func (classifier SSLClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
-		func(payload []byte, _ []*gopacket.Packet) (detected bool) {
+		func(payload []byte, _ []gopacket.Packet) (detected bool) {
 			if len(payload) >= 9 {
 				packetLen := int(binary.BigEndian.Uint16(payload[3:5]))
 				clientHelloLenBytes := append([]byte{0}, payload[6:9]...)

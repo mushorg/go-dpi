@@ -28,7 +28,7 @@ The `Initialize` method initializes all the selected modules in the library, by 
 Then, you need a flow that contains the packet. You can get the flow a packet belongs to with the following call:
 
 ```go
-flow, isNew := godpi.GetPacketFlow(&packet)
+flow, isNew := godpi.GetPacketFlow(packet)
 ```
 
 That call returns the flow, as well as whether that flow is a new one (this packet is the first in the flow) or an existing one.
@@ -69,7 +69,7 @@ func main() {
 		fmt.Println(err)
 	} else {
 		for packet := range packets {
-			flow, _ := godpi.GetPacketFlow(&packet)
+			flow, _ := godpi.GetPacketFlow(packet)
 			result := godpi.ClassifyFlow(flow)
 			if result.Protocol != types.Unknown {
 				fmt.Println(result.Source, "detected protocol", result.Protocol)

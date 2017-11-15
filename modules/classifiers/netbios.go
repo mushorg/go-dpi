@@ -11,7 +11,7 @@ import (
 // NetBIOSClassifier struct
 type NetBIOSClassifier struct{}
 
-func checkTCPNetBIOS(payload []byte, packetsRest []*gopacket.Packet) bool {
+func checkTCPNetBIOS(payload []byte, packetsRest []gopacket.Packet) bool {
 	if len(payload) < 8 {
 		return false
 	}
@@ -24,8 +24,8 @@ func checkTCPNetBIOS(payload []byte, packetsRest []*gopacket.Packet) bool {
 	return nbLen+4 == len(payload) && isSessRequest && namesHavePadding
 }
 
-func checkUDPNetBIOSWrapper(isFirstPktBroadcast *bool) func([]byte, []*gopacket.Packet) bool {
-	return func(payload []byte, packetsRest []*gopacket.Packet) bool {
+func checkUDPNetBIOSWrapper(isFirstPktBroadcast *bool) func([]byte, []gopacket.Packet) bool {
+	return func(payload []byte, packetsRest []gopacket.Packet) bool {
 		// try to detect a name query
 		if len(payload) != 50 {
 			return false
@@ -45,7 +45,7 @@ func (classifier NetBIOSClassifier) HeuristicClassify(flow *types.Flow) bool {
 	var isFirstPktBroadcast bool
 	packets := flow.GetPackets()
 	if len(packets) > 0 {
-		if layer := (*packets[0]).Layer(layers.LayerTypeIPv4); layer != nil {
+		if layer := packets[0].Layer(layers.LayerTypeIPv4); layer != nil {
 			ipLayer := layer.(*layers.IPv4)
 			isFirstPktBroadcast = ipLayer.DstIP[3] == 0xFF
 		}

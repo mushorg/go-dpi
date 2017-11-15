@@ -102,13 +102,13 @@ func TestGetPacketFlow(t *testing.T) {
 		t.Fatal(err)
 	}
 	packet := <-dumpPackets
-	flowFirst, isNew := GetPacketFlow(&packet)
+	flowFirst, isNew := GetPacketFlow(packet)
 	if !isNew {
 		t.Error("Not new flow for first packet")
 	}
 	for i := 0; i < 3; i++ {
 		packet := <-dumpPackets
-		flowNext, isNew := GetPacketFlow(&packet)
+		flowNext, isNew := GetPacketFlow(packet)
 		if isNew {
 			t.Error("New flow returned for packet in existing flow")
 		}
@@ -142,7 +142,7 @@ func BenchmarkClassifyFlow(b *testing.B) {
 				b.Error(err)
 			}
 			for p := range dumpPackets {
-				flow, _ := GetPacketFlow(&p)
+				flow, _ := GetPacketFlow(p)
 				if flow.GetClassificationResult().Protocol == types.Unknown {
 					ClassifyFlow(flow)
 				}

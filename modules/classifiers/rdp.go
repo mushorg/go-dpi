@@ -14,7 +14,7 @@ type RDPClassifier struct{}
 // HeuristicClassify for RDPClassifier
 func (classifier RDPClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
-		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+		func(payload []byte, packetsRest []gopacket.Packet) bool {
 			if len(payload) < 20 {
 				return false
 			}

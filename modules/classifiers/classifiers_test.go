@@ -20,7 +20,7 @@ func TestClassifyFlow(t *testing.T) {
 		<-dumpPackets
 	}
 	packet := <-dumpPackets
-	flow := types.CreateFlowFromPacket(&packet)
+	flow := types.CreateFlowFromPacket(packet)
 	result := module.ClassifyFlow(flow)
 	flowCls := flow.GetClassificationResult()
 	if result.Protocol != types.HTTP || flowCls.Protocol != types.HTTP {
@@ -55,7 +55,7 @@ func TestCheckFlowLayer(t *testing.T) {
 	flow := types.NewFlow()
 	for packet := range dumpPackets {
 		packetCopy := packet
-		flow.AddPacket(&packetCopy)
+		flow.AddPacket(packetCopy)
 	}
 	noDetections := checkFlowLayer(flow, layers.LayerTypeTCP, func(layer gopacket.Layer) bool {
 		_, ok := layer.(*layers.TCP)
@@ -86,12 +86,12 @@ func TestCheckFirstPayload(t *testing.T) {
 	flow := types.NewFlow()
 	for packet := range dumpPackets {
 		packetCopy := packet
-		flow.AddPacket(&packetCopy)
+		flow.AddPacket(packetCopy)
 	}
 
 	called := false
 	noDetections := checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
-		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+		func(payload []byte, packetsRest []gopacket.Packet) bool {
 			called = true
 			if payload == nil || len(payload) == 0 {
 				t.Error("No payload passed to callback")
@@ -120,7 +120,7 @@ func getPcapDumpProtoMap(filename string) (result map[types.Protocol]int) {
 		return
 	}
 	for packet := range packets {
-		flow, _ := types.GetFlowForPacket(&packet)
+		flow, _ := types.GetFlowForPacket(packet)
 		if flow.GetClassificationResult().Protocol == types.Unknown {
 			res := module.ClassifyFlow(flow)
 			result[res.Protocol]++
@@ -175,7 +175,7 @@ func TestConfigureModule(t *testing.T) {
 		<-dumpPackets
 	}
 	packet := <-dumpPackets
-	flow := types.CreateFlowFromPacket(&packet)
+	flow := types.CreateFlowFromPacket(packet)
 	result := module.ClassifyFlow(flow)
 	if result.Protocol != types.HTTP {
 		t.Error("Wrong protocol detected:", result.Protocol)

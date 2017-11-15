@@ -13,7 +13,7 @@ type SSHClassifier struct{}
 // HeuristicClassify for SSHClassifier
 func (classifier SSHClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
-		func(payload []byte, _ []*gopacket.Packet) bool {
+		func(payload []byte, _ []gopacket.Packet) bool {
 			payloadStr := string(payload)
 			hasSuffix := strings.HasSuffix(payloadStr, "\n")
 			hasSSHStr := strings.HasPrefix(payloadStr, "SSH") || strings.Contains(payloadStr, "OpenSSH")

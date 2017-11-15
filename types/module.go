@@ -38,7 +38,7 @@ func BenchmarkModule(dumpsDir string, module Module, times int) error {
 				return err
 			}
 			for p := range dumpPackets {
-				flow, _ := GetFlowForPacket(&p)
+				flow, _ := GetFlowForPacket(p)
 				if flow.GetClassificationResult().Protocol == Unknown {
 					module.ClassifyFlow(flow)
 				}
