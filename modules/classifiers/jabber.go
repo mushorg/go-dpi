@@ -13,7 +13,7 @@ type JABBERClassifier struct{}
 // HeuristicClassify for JABBERClassifier
 func (classifier JABBERClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
-		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+		func(payload []byte, packetsRest []gopacket.Packet) bool {
 			payloadStr := string(payload)
 			result, _ := regexp.MatchString("<?xml\\sversion='\\d+.\\d+'?.*", payloadStr)
 			return result

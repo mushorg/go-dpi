@@ -13,7 +13,7 @@ type MQTTClassifier struct{}
 // HeuristicClassify for MQTTClassifier
 func (classifier MQTTClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
-		func(payload []byte, packetsRest []*gopacket.Packet) bool {
+		func(payload []byte, packetsRest []gopacket.Packet) bool {
 			//check Control packet (connect)
 			isValidPacket := payload[0] == 0x10
 			//check message lenght

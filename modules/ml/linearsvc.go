@@ -110,14 +110,14 @@ func (module *LinearSVCModule) Destroy() error {
 
 func getFirstClientPayload(flow *types.Flow) (classifyPayload []byte, isTCP bool) {
 	packets := flow.GetPackets()
-	firstTransport := (*packets[0]).TransportLayer()
+	firstTransport := packets[0].TransportLayer()
 	switch transport := firstTransport.(type) {
 	case *layers.TCP:
 		isTCP = true
 		if transport.SYN && !transport.ACK && len(packets) >= 4 {
 			clientPort := transport.SrcPort
 			for _, pkt := range packets[3:] {
-				if pktTCP := (*pkt).Layer(layers.LayerTypeTCP).(*layers.TCP); pktTCP != nil && pktTCP.SrcPort == clientPort {
+				if pktTCP := pkt.Layer(layers.LayerTypeTCP).(*layers.TCP); pktTCP != nil && pktTCP.SrcPort == clientPort {
 					if pktPayload := pktTCP.LayerPayload(); pktPayload != nil && len(pktPayload) > 0 {
 						classifyPayload = pktPayload
 						break
@@ -128,7 +128,7 @@ func getFirstClientPayload(flow *types.Flow) (classifyPayload []byte, isTCP bool
 	case *layers.UDP:
 		isTCP = false
 		for _, pkt := range packets {
-			if pktUDP := (*pkt).Layer(layers.LayerTypeUDP).(*layers.UDP); pktUDP != nil {
+			if pktUDP := pkt.Layer(layers.LayerTypeUDP).(*layers.UDP); pktUDP != nil {
 				if pktPayload := pktUDP.LayerPayload(); pktPayload != nil && len(pktPayload) > 0 {
 					classifyPayload = pktPayload
 					break

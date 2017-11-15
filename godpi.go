@@ -81,7 +81,7 @@ func SetCacheExpiration(expiration time.Duration) {
 // will be created with only this packet.
 // The function also returns whether the returned Flow is a new one, and not
 // one that already existed.
-func GetPacketFlow(packet *gopacket.Packet) (*types.Flow, bool) {
+func GetPacketFlow(packet gopacket.Packet) (*types.Flow, bool) {
 	return types.GetFlowForPacket(packet)
 }
 

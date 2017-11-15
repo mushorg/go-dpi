@@ -71,7 +71,7 @@ func main() {
 	count = 0
 	for packet := range packetChannel {
 		fmt.Printf("Packet #%d: ", count+1)
-		flow, isNew := godpi.GetPacketFlow(&packet)
+		flow, isNew := godpi.GetPacketFlow(packet)
 		result := godpi.ClassifyFlow(flow)
 		if result.Protocol != types.Unknown {
 			fmt.Print(result)

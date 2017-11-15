@@ -51,7 +51,7 @@ func TestClassifyFlow(t *testing.T) {
 	httpFlow := types.NewFlow()
 	for i := 0; i < 4; i++ {
 		packet := <-packetChan
-		httpFlow.AddPacket(&packet)
+		httpFlow.AddPacket(packet)
 	}
 
 	res := module.ClassifyFlow(httpFlow)
@@ -72,7 +72,7 @@ func TestClassifyFlow(t *testing.T) {
 	}
 	dnsFlow := types.NewFlow()
 	dnsPacket := <-packetChan
-	dnsFlow.AddPacket(&dnsPacket)
+	dnsFlow.AddPacket(dnsPacket)
 
 	res = module.ClassifyFlow(dnsFlow)
 	if res.Protocol != types.DNS {

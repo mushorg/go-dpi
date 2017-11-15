@@ -106,7 +106,7 @@ func (module *ClassifierModule) ConfigureModule(config ClassifierModuleConfig) {
 func checkFlowLayer(flow *types.Flow, layerType gopacket.LayerType,
 	checkFunc func(layer gopacket.Layer) bool) bool {
 	for _, packet := range flow.GetPackets() {
-		if layer := (*packet).Layer(layerType); layer != nil {
+		if layer := packet.Layer(layerType); layer != nil {
 			if checkFunc(layer) {
 				return true
 			}
@@ -118,10 +118,10 @@ func checkFlowLayer(flow *types.Flow, layerType gopacket.LayerType,
 // checkFirstPayload applies the check function to the payload of the first
 // packet that has the specified layer. It returns the result of that function
 // on that first packet, or false if no such packet exists.
-func checkFirstPayload(packets []*gopacket.Packet, layerType gopacket.LayerType,
-	checkFunc func(payload []byte, packetsRest []*gopacket.Packet) bool) bool {
+func checkFirstPayload(packets []gopacket.Packet, layerType gopacket.LayerType,
+	checkFunc func(payload []byte, packetsRest []gopacket.Packet) bool) bool {
 	for i, packet := range packets {
-		if layer := (*packet).Layer(layerType); layer != nil {
+		if layer := packet.Layer(layerType); layer != nil {
 			if payload := layer.LayerPayload(); payload != nil && len(payload) > 0 {
 				return checkFunc(payload, packets[i+1:])
 			}

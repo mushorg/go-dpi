@@ -17,9 +17,9 @@ func TestNewFlow(t *testing.T) {
 
 func TestCreateFlowFromPacket(t *testing.T) {
 	packet := gopacket.NewPacket([]byte{}, layers.LayerTypeEthernet, gopacket.DecodeOptions{})
-	flow := CreateFlowFromPacket(&packet)
+	flow := CreateFlowFromPacket(packet)
 	packets := flow.GetPackets()
-	if len(packets) != 1 || *packets[0] != packet {
+	if len(packets) != 1 || packets[0] != packet {
 		t.Error("Flow doesn't have only the given packet")
 	}
 }
@@ -34,7 +34,7 @@ func TestGetFlowForPacket(t *testing.T) {
 	}
 	for packet := range dumpPackets {
 		packetCopy := packet
-		detectedFlow, isNew := GetFlowForPacket(&packetCopy)
+		detectedFlow, isNew := GetFlowForPacket(packetCopy)
 		if isNew {
 			flows = append(flows, detectedFlow)
 		}
@@ -58,16 +58,16 @@ func TestFlushTrackedFlows(t *testing.T) {
 		t.Fatal(err)
 	}
 	packet := <-dumpPackets
-	_, isNew := GetFlowForPacket(&packet)
+	_, isNew := GetFlowForPacket(packet)
 	if !isNew {
 		t.Error("Detected existing flow for first packet in flow")
 	}
-	_, isNew = GetFlowForPacket(&packet)
+	_, isNew = GetFlowForPacket(packet)
 	if isNew {
 		t.Error("Didn't detect existing flow for second packet in flow")
 	}
 	FlushTrackedFlows()
-	_, isNew = GetFlowForPacket(&packet)
+	_, isNew = GetFlowForPacket(packet)
 	if !isNew {
 		t.Error("Detected existing flow for first packet after flush")
 	}
