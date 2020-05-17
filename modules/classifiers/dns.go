@@ -12,6 +12,11 @@ type DNSClassifier struct{}
 // HeuristicClassify for DNSClassifier
 func (classifier DNSClassifier) HeuristicClassify(flow *types.Flow) bool {
 	return checkFlowLayer(flow, layers.LayerTypeUDP, func(layer gopacket.Layer) (detected bool) {
+		defer func() {
+			if err := recover(); err != nil {
+				detected = false
+			}
+		}()
 		layerParser := gopacket.DecodingLayerParser{}
 		dns := layers.DNS{}
 		err := dns.DecodeFromBytes(layer.LayerPayload(), &layerParser)
