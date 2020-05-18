@@ -56,7 +56,7 @@ extern int ndpiInitialize() {
 
   set_ndpi_malloc(malloc);
   set_ndpi_free(free);
-  ndpi_struct = ndpi_init_detection_module();
+  ndpi_struct = ndpi_init_detection_module(ndpi_no_prefs);
 
   if (ndpi_struct == NULL) {
       return -1;
@@ -68,6 +68,8 @@ extern int ndpiInitialize() {
   // allocate memory for id and flow tracking
   size_id_struct = ndpi_detection_get_sizeof_ndpi_id_struct();
   size_flow_struct = ndpi_detection_get_sizeof_ndpi_flow_struct();
+
+  ndpi_finalize_initalization(ndpi_struct);
 
   return 0;
 }
