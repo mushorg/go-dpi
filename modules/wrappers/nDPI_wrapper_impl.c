@@ -207,6 +207,9 @@ static int packet_processing(const u_int64_t time, const struct pcap_pkthdr *hea
     // here the actual detection is performed
     ndpi_protocol detected = ndpi_detection_process_packet(ndpi_struct, ndpi_flow, (uint8_t *) iph, ipsize, time, src, dst);
     protocol = detected.master_protocol;
+    if (protocol == 0) {
+        protocol = detected.app_protocol;
+    }
   } else {
     static u_int8_t frag_warning_used = 0;
 

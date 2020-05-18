@@ -15,20 +15,21 @@ import (
 
 // ndpiCodeToProtocol maps the nDPI protocol codes to go-dpi protocols.
 var ndpiCodeToProtocol = map[uint32]types.Protocol{
-	7:   types.HTTP,    // NDPI_PROTOCOL_HTTP
-	5:   types.DNS,     // NDPI_PROTOCOL_DNS
-	92:  types.SSH,     // NDPI_PROTOCOL_SSH
-	127: types.RPC,     // NDPI_PROTOCOL_DCERPC
-	3:   types.SMTP,    // NDPI_PROTOCOL_MAIL_SMTP
-	88:  types.RDP,     // NDPI_PROTOCOL_RDP
-	16:  types.SMB,     // NDPI_PROTOCOL_SMB
-	81:  types.ICMP,    // NDPI_PROTOCOL_IP_ICMP
-	1:   types.FTP,     // NDPI_PROTOCOL_FTP_CONTROL
-	91:  types.SSL,     // NDPI_PROTOCOL_SSL
-	64:  types.SSL,     // NDPI_PROTOCOL_SSL_NO_CERT
-	10:  types.NetBIOS, // NDPI_PROTOCOL_NETBIOS
-	67:  types.JABBER,  // NDPI_PROTOCOL_UNENCRYPTED_JABBER
-	222: types.MQTT,    // NDPI_PROTOCOL_MQTT
+	7:   types.HTTP,       // NDPI_PROTOCOL_HTTP
+	5:   types.DNS,        // NDPI_PROTOCOL_DNS
+	92:  types.SSH,        // NDPI_PROTOCOL_SSH
+	127: types.RPC,        // NDPI_PROTOCOL_DCERPC
+	3:   types.SMTP,       // NDPI_PROTOCOL_MAIL_SMTP
+	88:  types.RDP,        // NDPI_PROTOCOL_RDP
+	16:  types.SMB,        // NDPI_PROTOCOL_SMB
+	81:  types.ICMP,       // NDPI_PROTOCOL_IP_ICMP
+	1:   types.FTP,        // NDPI_PROTOCOL_FTP_CONTROL
+	91:  types.SSL,        // NDPI_PROTOCOL_SSL
+	64:  types.SSL,        // NDPI_PROTOCOL_SSL_NO_CERT
+	10:  types.NetBIOS,    // NDPI_PROTOCOL_NETBIOS
+	67:  types.JABBER,     // NDPI_PROTOCOL_UNENCRYPTED_JABBER
+	222: types.MQTT,       // NDPI_PROTOCOL_MQTT
+	37:  types.BITTORRENT, // NDPI_PROTOCOL_BITTORRENT
 }
 
 // NDPIWrapperName is the identification of the nDPI library.
