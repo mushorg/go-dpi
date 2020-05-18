@@ -1,6 +1,7 @@
 package types
 
 import (
+	"net"
 	"testing"
 
 	"github.com/google/gopacket"
@@ -77,5 +78,25 @@ func TestClassificationResultString(t *testing.T) {
 	result := ClassificationResult{Protocol: "proto", Source: "src"}
 	if resStr := result.String(); resStr != "Detected protocol proto from source src" {
 		t.Errorf("Wrong string returned: %v", resStr)
+	}
+}
+
+func TestFlowGenerationFromFlows(t *testing.T) {
+	ip1 := layers.NewIPEndpoint(net.ParseIP("fafa::1"))
+	ip2 := layers.NewIPEndpoint(net.ParseIP("f0f0::2"))
+	port1 := layers.NewTCPPortEndpoint(111)
+	port2 := layers.NewTCPPortEndpoint(222)
+	networkFlow, err := gopacket.FlowFromEndpoints(ip2, ip1)
+	if err != nil {
+		t.Errorf("Error creating flow: %v", err)
+	}
+	transportFlow, err := gopacket.FlowFromEndpoints(port2, port1)
+	if err != nil {
+		t.Errorf("Error creating flow: %v", err)
+	}
+	result := endpointStrFromFlows(networkFlow, transportFlow)
+	expected := "fafa::1:111,f0f0::2:222"
+	if result != expected {
+		t.Errorf("Expected %v, got instead: %v", expected, result)
 	}
 }
