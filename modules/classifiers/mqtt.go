@@ -17,7 +17,7 @@ func (classifier MQTTClassifier) HeuristicClassify(flow *types.Flow) bool {
 			//check Control packet (connect)
 			isValidPacket := payload[0] == 0x10
 			//check message lenght
-			isValidLenght := int(payload[1]) == len(payload[2:])
+			isValidLenght := int(payload[1]) == (len(payload) -2)
 			protocolNameStr := string(payload[4:])
 			//check protocol name
 			isValidMQTT := strings.HasPrefix(protocolNameStr, "MQ")
