@@ -3,6 +3,12 @@ sudo: required
 language: go
 go:
     - 1.14
+    
+addons:
+  apt:
+    packages:
+      libpcap-dev
+      
 services:
     - docker
 env:
