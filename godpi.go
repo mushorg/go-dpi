@@ -8,6 +8,7 @@ import (
 	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
 	"time"
+"fmt"
 )
 
 var activatedModules []types.Module
@@ -30,7 +31,9 @@ func Initialize() (errs []error) {
 			}
 		}
 		if !activated {
+fmt.Println("init module")
 			err := module.Initialize()
+fmt.Println("init", err)
 			if err == nil {
 				activatedModules = append(activatedModules, module)
 			} else {
