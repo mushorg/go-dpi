@@ -10,16 +10,23 @@ import (
 	"time"
 )
 
+var (
+	// exported ML options
+	TCPModelPath = "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_tcp.model"
+	UDPModelPath = "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_udp.model"
+	MLThreshold  = 0.8(float32)
+)
 var activatedModules []types.Module
 var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
 	wrappers.NewWrapperModule(),
-	ml.NewLinearSVCModule(),
 }
 var cacheExpiration = 5 * time.Minute
 
 // Initialize initializes the library and the selected modules.
 func Initialize() (errs []error) {
+	// create ml module and append to module list
+	moduleList = append(moduleList, ml.NewLinearSVCModule(TCPModelPath, UDPModelPath, MLThreshold))
 	types.InitCache(cacheExpiration)
 	for _, module := range moduleList {
 		activated := false

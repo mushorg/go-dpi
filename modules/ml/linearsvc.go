@@ -190,11 +190,11 @@ func (module *LinearSVCModule) ClassifyFlowAll(flow *types.Flow) []types.Classif
 // NewLinearSVCModule returns a new LinearSVCModule with the default configuration.
 // By default, the models are downloaded from the project's wiki on initialization,
 // and the classification threshold is 0.8.
-func NewLinearSVCModule() *LinearSVCModule {
+func NewLinearSVCModule(t, u string, threshold float32) *LinearSVCModule {
 	return &LinearSVCModule{
-		TCPModelPath: "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_tcp.model",
-		UDPModelPath: "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_udp.model",
-		Threshold:    0.8,
+		TCPModelPath: t,
+		UDPModelPath: u,
+		Threshold:    threshold,
 	}
 }
 
