@@ -44,8 +44,6 @@ func main() {
 		return
 	}
 
-	//mlo := godpi.MLOption{TCPModelPath: "../2grams_tcp.model", UDPModelPath: "../2grams_udp.model", Threshold: 0.8}
-	//initErrs := godpi.Initialize(mlo)
 	initErrs := godpi.Initialize()
 	if len(initErrs) != 0 {
 		for _, err := range initErrs {
@@ -90,7 +88,6 @@ func main() {
 		select {
 		case <-signalChannel:
 			fmt.Println("Received interrupt signal")
-			fmt.Println(protoCounts)
 			intSignal = true
 		default:
 		}
