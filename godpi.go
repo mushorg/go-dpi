@@ -2,13 +2,14 @@
 package godpi
 
 import (
+	"fmt"
 	"github.com/google/gopacket"
 	"github.com/mushorg/go-dpi/modules/classifiers"
 	"github.com/mushorg/go-dpi/modules/ml"
 	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
+	"log"
 	"time"
-"fmt"
 )
 
 var (
@@ -35,8 +36,8 @@ type MLOption struct {
 	Threshold                  float32
 }
 
-func (o *MLOption) Apply(mod types.Module) {
-	lsm := mod.(ml.LinearSVCModule)
+func (o MLOption) Apply(mod types.Module) {
+	lsm := mod.(*ml.LinearSVCModule)
 	if o.TCPModelPath != "" {
 		lsm.TCPModelPath = o.TCPModelPath
 	}
@@ -51,7 +52,7 @@ func (o *MLOption) Apply(mod types.Module) {
 // Initialize initializes the library and the selected modules.
 func Initialize(opts ...Options) (errs []error) {
 	for _, opt := range opts {
-		switch t := opt.(type) {
+		switch opt.(type) {
 		case MLOption:
 			opt.Apply(moduleList[2])
 		default:
@@ -68,9 +69,9 @@ func Initialize(opts ...Options) (errs []error) {
 			}
 		}
 		if !activated {
-fmt.Println("init module")
+			fmt.Println("init module")
 			err := module.Initialize()
-fmt.Println("init", err)
+			fmt.Println("init", err)
 			if err == nil {
 				activatedModules = append(activatedModules, module)
 			} else {
