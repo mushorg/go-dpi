@@ -1,7 +1,6 @@
 #include <pcap.h>
 #ifndef DISABLE_NDPI
 #include <ndpi/ndpi_main.h>
-#include <ndpi/ndpi_api.h>
 #endif
 
 extern int ndpiInitialize();
