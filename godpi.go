@@ -12,12 +12,6 @@ import (
 	"time"
 )
 
-var (
-	// exported ML options
-	TCPModelPath = "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_tcp.model"
-	UDPModelPath = "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_udp.model"
-	MLThreshold  = float32(0.8)
-)
 var activatedModules []types.Module
 var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
