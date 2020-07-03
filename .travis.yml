@@ -1,20 +1,14 @@
 dist: trusty
-sudo: required
-language: go
-go:
-    - 1.14
+
 services:
     - docker
-env:
-    - GO_DIRS=". ./modules/classifiers ./modules/wrappers ./modules/ml ./types ./utils ./godpi_example"
 script:
-    - sudo docker build -t godpi-example .
+    - docker build -t godpi-example .
     - >
-        sudo docker run --entrypoint=/bin/bash
+        docker run --entrypoint=/bin/bash
         -e TRAVIS
         -e TRAVIS_JOB_ID
-        -e GO_DIRS
-        godpi-example -c 'go get golang.org/x/tools/cmd/cover github.com/mattn/goveralls &&
-        $GOPATH/bin/goveralls -ignore godpi_example/example_app.go -service=travis-ci'
-    - ./.travis.golint.sh
-    - ./.travis.govet.sh
+        godpi-example -c 'go get golang.org/x/tools/cmd/cover github.com/mattn/goveralls golang.org/x/lint/golint &&
+        $GOPATH/bin/goveralls -ignore godpi_example/example_app.go -service=travis-ci &&
+        go vet ./... &&
+        golint ./...'

@@ -15,19 +15,49 @@ var (
 	// exported ML options
 	TCPModelPath = "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_tcp.model"
 	UDPModelPath = "https://raw.githubusercontent.com/wiki/mushorg/go-dpi/2grams_udp.model"
-	MLThreshold  = 0.8(float32)
+	MLThreshold  = float32(0.8)
 )
 var activatedModules []types.Module
 var moduleList = []types.Module{
 	classifiers.NewClassifierModule(),
 	wrappers.NewWrapperModule(),
+	ml.NewLinearSVCModule(),
 }
 var cacheExpiration = 5 * time.Minute
 
+// Options allow end users init module by themself
+type Options interface {
+	Apply(types.Module)
+}
+
+type MLOption struct {
+	TCPModelPath, UDPModelPath string
+	Threshold                  float32
+}
+
+func (o *MLOption) Apply(mod types.Module) {
+	lsm := mod.(ml.LinearSVCModule)
+	if o.TCPModelPath != "" {
+		lsm.TCPModelPath = o.TCPModelPath
+	}
+	if o.UDPModelPath != "" {
+		lsm.UDPModelPath = o.UDPModelPath
+	}
+	if o.Threshold > 0.0 {
+		lsm.Threshold = o.Threshold
+	}
+}
+
 // Initialize initializes the library and the selected modules.
-func Initialize() (errs []error) {
-	// create ml module and append to module list
-	moduleList = append(moduleList, ml.NewLinearSVCModule(TCPModelPath, UDPModelPath, MLThreshold))
+func Initialize(opts ...Options) (errs []error) {
+	for _, opt := range opts {
+		switch t := opt.(type) {
+		case MLOption:
+			opt.Apply(moduleList[2])
+		default:
+			log.Fatal("option", opt, "not implemented.")
+		}
+	}
 	types.InitCache(cacheExpiration)
 	for _, module := range moduleList {
 		activated := false
