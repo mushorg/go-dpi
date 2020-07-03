@@ -2,7 +2,6 @@
 package godpi
 
 import (
-	"fmt"
 	"github.com/google/gopacket"
 	"github.com/mushorg/go-dpi/modules/classifiers"
 	"github.com/mushorg/go-dpi/modules/ml"

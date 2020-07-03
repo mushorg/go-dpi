@@ -30,7 +30,6 @@ func main() {
 
 	if *device != "" {
 		// check if interface was given
-		fmt.Println("open live")
 		handle, deverr := pcap.OpenLive(*device, 1024, false, time.Duration(-1))
 		if deverr != nil {
 			fmt.Println("Error opening device:", deverr)
@@ -44,8 +43,9 @@ func main() {
 		fmt.Println("File does not exist:", *filename)
 		return
 	}
-	fmt.Println("init")
 
+	//mlo := godpi.MLOption{TCPModelPath: "../2grams_tcp.model", UDPModelPath: "../2grams_udp.model", Threshold: 0.8}
+	//initErrs := godpi.Initialize(mlo)
 	initErrs := godpi.Initialize()
 	if len(initErrs) != 0 {
 		for _, err := range initErrs {
@@ -53,7 +53,7 @@ func main() {
 		}
 		return
 	}
-	fmt.Println("init done")
+	fmt.Println("Init done")
 
 	defer func() {
 		godpi.Destroy()
@@ -64,7 +64,6 @@ func main() {
 	}()
 
 	signalChannel := make(chan os.Signal, 1)
-	fmt.Println("notify")
 	signal.Notify(signalChannel, os.Interrupt)
 	intSignal := false
 
@@ -73,23 +72,20 @@ func main() {
 		return
 	}
 	count = 0
-	fmt.Println("waiting data")
 	for packet := range packetChannel {
 		flow, isNew := godpi.GetPacketFlow(packet)
 		result := godpi.ClassifyFlow(flow)
 		if result.Protocol != types.Unknown {
-			fmt.Printf("Packet #%d: ", count+1)
-			fmt.Println(result)
 			idCount++
 			protoCounts[result.Protocol]++
-		} //else {
-		//	fmt.Print("Could not identify")
-		//}
+		} else {
+			fmt.Print("Could not identify")
+		}
 		if isNew {
 			fmt.Println(" (new flow)")
-		} //else {
-		//	fmt.Println()
-		//}
+		} else {
+			fmt.Println()
+		}
 
 		select {
 		case <-signalChannel:
