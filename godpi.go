@@ -20,7 +20,7 @@ var moduleList = []types.Module{
 }
 var cacheExpiration = 5 * time.Minute
 
-// Options allow end users init module by themself
+// Options allow end users init module with custom options
 type Options interface {
 	Apply(types.Module)
 }
@@ -63,9 +63,7 @@ func Initialize(opts ...Options) (errs []error) {
 			}
 		}
 		if !activated {
-			fmt.Println("init module")
 			err := module.Initialize()
-			fmt.Println("init", err)
 			if err == nil {
 				activatedModules = append(activatedModules, module)
 			} else {
