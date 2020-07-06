@@ -23,6 +23,10 @@ func Initialize(opts ...Options) (errs []error) {
 	// apply all options to all modules
 	// check if the option will be applied in appropriate module inside Apply func
 	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+
 		for _, m := range moduleList {
 			opt.Apply(m)
 		}

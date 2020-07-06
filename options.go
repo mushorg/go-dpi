@@ -8,6 +8,7 @@ import (
 )
 
 // Options allow end users init module with custom options
+// NOTE. it's necessary to check the module passed in Apply func
 type Options interface {
 	Apply(types.Module)
 }
@@ -23,7 +24,7 @@ type MLOption struct {
 func (o MLOption) Apply(mod types.Module) {
 	// check module
 	lsm, ok := mod.(*ml.LinearSVCModule)
-	if !ok {
+	if !ok || lsm == nil {
 		return
 	}
 	if o.TCPModelPath != "" {
@@ -45,8 +46,8 @@ type ClassifierOption struct {
 
 func (o ClassifierOption) Apply(mod types.Module) {
 	// check module
-	_, ok := mod.(*classifiers.ClassifierModule)
-	if !ok {
+	cm, ok := mod.(*classifiers.ClassifierModule)
+	if !ok || cm == nil {
 		return
 	}
 	// TODO
