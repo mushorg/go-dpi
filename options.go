@@ -46,7 +46,7 @@ type ClassifierOption struct {
 
 func (o ClassifierOption) Apply(mod types.Module) {
 	// check module
-	cm, ok := mod.(*classifiers.ClassifierModule)
+	_, ok := mod.(*classifiers.ClassifierModule)
 	if !ok {
 		return
 	}
