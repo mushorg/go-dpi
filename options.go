@@ -24,7 +24,7 @@ type MLOption struct {
 func (o MLOption) Apply(mod types.Module) {
 	// check module
 	lsm, ok := mod.(*ml.LinearSVCModule)
-	if !ok || lsm == nil {
+	if !ok {
 		return
 	}
 	if o.TCPModelPath != "" {
@@ -47,7 +47,7 @@ type ClassifierOption struct {
 func (o ClassifierOption) Apply(mod types.Module) {
 	// check module
 	cm, ok := mod.(*classifiers.ClassifierModule)
-	if !ok || cm == nil {
+	if !ok {
 		return
 	}
 	// TODO
