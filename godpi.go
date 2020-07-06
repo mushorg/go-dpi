@@ -7,7 +7,6 @@ import (
 	"github.com/mushorg/go-dpi/modules/ml"
 	"github.com/mushorg/go-dpi/modules/wrappers"
 	"github.com/mushorg/go-dpi/types"
-	"reflect"
 	"time"
 )
 
@@ -19,44 +18,13 @@ var moduleList = []types.Module{
 }
 var cacheExpiration = 5 * time.Minute
 
-// Options allow end users init module with custom options
-type Options interface {
-	Apply(types.Module)
-}
-
-// MLOption take ml module options to override default values
-type MLOption struct {
-	TCPModelPath string
-	UDPModelPath string
-	Threshold    float32
-}
-
-// Apply ml module option to LinearSVCModule
-func (o MLOption) Apply(mod types.Module) {
-	lsm, ok := mod.(*ml.LinearSVCModule)
-	if !ok {
-		return
-	}
-	if o.TCPModelPath != "" {
-		lsm.TCPModelPath = o.TCPModelPath
-	}
-	if o.UDPModelPath != "" {
-		lsm.UDPModelPath = o.UDPModelPath
-	}
-	if o.Threshold > 0.0 {
-		lsm.Threshold = o.Threshold
-	}
-}
-
 // Initialize initializes the library and the selected modules.
 func Initialize(opts ...Options) (errs []error) {
+	// apply all options to all modules
+	// check if the option will be applied in appropriate module inside Apply func
 	for _, opt := range opts {
 		for _, m := range moduleList {
-			if reflect.TypeOf(opt) == reflect.TypeOf(MLOption{}) &&
-				reflect.TypeOf(m) == reflect.TypeOf(&ml.LinearSVCModule{}) {
-				opt.Apply(m)
-				break
-			}
+			opt.Apply(m)
 		}
 	}
 	types.InitCache(cacheExpiration)
