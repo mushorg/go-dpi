@@ -51,6 +51,7 @@ func main() {
 		}
 		return
 	}
+	fmt.Println("Init done")
 
 	defer func() {
 		godpi.Destroy()

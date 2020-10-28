@@ -19,7 +19,18 @@ var moduleList = []types.Module{
 var cacheExpiration = 5 * time.Minute
 
 // Initialize initializes the library and the selected modules.
-func Initialize() (errs []error) {
+func Initialize(opts ...Options) (errs []error) {
+	// apply all options to all modules
+	// check if the option will be applied in appropriate module inside Apply func
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+
+		for _, m := range moduleList {
+			opt.Apply(m)
+		}
+	}
 	types.InitCache(cacheExpiration)
 	for _, module := range moduleList {
 		activated := false
