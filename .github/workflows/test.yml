@@ -20,6 +20,8 @@ jobs:
     
     - name: Dependencies
       run: |
+        sudo echo "deb http://packages.wand.net.nz trusty main" | tee -a /etc/apt/sources.list
+        sudo curl https://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
         sudo apt update
         sudo apt -y install autoconf automake libtool git libpcap-dev libtrace4 libtrace4-dev libprotoident libprotoident-dev liblinear3 liblinear-dev
         sudo git clone --branch 3.2-stable https://github.com/ntop/nDPI/ /tmp/nDPI
