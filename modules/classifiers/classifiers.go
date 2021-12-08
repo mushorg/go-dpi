@@ -122,7 +122,7 @@ func checkFirstPayload(packets []gopacket.Packet, layerType gopacket.LayerType,
 	checkFunc func(payload []byte, packetsRest []gopacket.Packet) bool) bool {
 	for i, packet := range packets {
 		if layer := packet.Layer(layerType); layer != nil {
-			if payload := layer.LayerPayload(); payload != nil && len(payload) > 0 {
+			if payload := layer.LayerPayload(); len(payload) > 0 {
 				return checkFunc(payload, packets[i+1:])
 			}
 		}

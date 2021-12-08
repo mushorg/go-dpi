@@ -2,15 +2,16 @@
 package ml
 
 import (
-	"github.com/google/gopacket/layers"
-	"github.com/mushorg/go-dpi/types"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"unsafe"
+
+	"github.com/google/gopacket/layers"
+	"github.com/mushorg/go-dpi/types"
+	"github.com/pkg/errors"
 )
 
 // #cgo LDFLAGS: -llinear
@@ -118,7 +119,7 @@ func getFirstClientPayload(flow *types.Flow) (classifyPayload []byte, isTCP bool
 			clientPort := transport.SrcPort
 			for _, pkt := range packets[3:] {
 				if pktTCP := pkt.Layer(layers.LayerTypeTCP).(*layers.TCP); pktTCP != nil && pktTCP.SrcPort == clientPort {
-					if pktPayload := pktTCP.LayerPayload(); pktPayload != nil && len(pktPayload) > 0 {
+					if pktPayload := pktTCP.LayerPayload(); len(pktPayload) > 0 {
 						classifyPayload = pktPayload
 						break
 					}
@@ -129,7 +130,7 @@ func getFirstClientPayload(flow *types.Flow) (classifyPayload []byte, isTCP bool
 		isTCP = false
 		for _, pkt := range packets {
 			if pktUDP := pkt.Layer(layers.LayerTypeUDP).(*layers.UDP); pktUDP != nil {
-				if pktPayload := pktUDP.LayerPayload(); pktPayload != nil && len(pktPayload) > 0 {
+				if pktPayload := pktUDP.LayerPayload(); len(pktPayload) > 0 {
 					classifyPayload = pktPayload
 					break
 				}
