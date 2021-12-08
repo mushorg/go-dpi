@@ -1,0 +1,32 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    
+    - name: Dependencies
+      run: |
+        apt update
+        apt -y install autoconf automake libtool git libpcap-dev libtrace4 libtrace4-dev libprotoident libprotoident-dev liblinear3 liblinear-dev
+        git clone --branch 3.2-stable https://github.com/ntop/nDPI/ /tmp/nDPI
+        cd /tmp/nDPI && ./autogen.sh && ./configure && make && make install && cd -
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
