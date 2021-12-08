@@ -1,9 +1,10 @@
 package wrappers
 
 import (
+	"testing"
+
 	"github.com/mushorg/go-dpi/types"
 	"github.com/mushorg/go-dpi/utils"
-	"testing"
 )
 
 func TestLPIWrapperClassifyFlow(t *testing.T) {

@@ -3,6 +3,7 @@ package classifiers
 import (
 	"bytes"
 	"encoding/binary"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/mushorg/go-dpi/types"

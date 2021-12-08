@@ -2,10 +2,11 @@ package ml
 
 import (
 	"encoding/binary"
-	"github.com/mushorg/go-dpi/types"
-	"github.com/mushorg/go-dpi/utils"
 	"os"
 	"testing"
+
+	"github.com/mushorg/go-dpi/types"
+	"github.com/mushorg/go-dpi/utils"
 )
 
 var tcpModelFile, udpModelFile string

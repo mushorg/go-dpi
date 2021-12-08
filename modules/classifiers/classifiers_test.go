@@ -1,13 +1,13 @@
 package classifiers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/mushorg/go-dpi/types"
 	"github.com/mushorg/go-dpi/utils"
-	"strings"
 )
 
 func TestClassifyFlow(t *testing.T) {
@@ -93,7 +93,7 @@ func TestCheckFirstPayload(t *testing.T) {
 	noDetections := checkFirstPayload(flow.GetPackets(), layers.LayerTypeTCP,
 		func(payload []byte, packetsRest []gopacket.Packet) bool {
 			called = true
-			if payload == nil || len(payload) == 0 {
+			if len(payload) == 0 {
 				t.Error("No payload passed to callback")
 			}
 			if !strings.HasPrefix(string(payload), "GET /download.html") {

@@ -3,9 +3,10 @@
 package wrappers
 
 import (
+	"strconv"
+
 	"github.com/mushorg/go-dpi/types"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 // WrapperModule is the module that contains wrappers for other protocol

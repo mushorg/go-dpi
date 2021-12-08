@@ -1,10 +1,11 @@
 package types
 
 import (
-	"github.com/mushorg/go-dpi/utils"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"path"
+
+	"github.com/mushorg/go-dpi/utils"
+	"github.com/pkg/errors"
 )
 
 // Module is implemented by every classification module provided by the

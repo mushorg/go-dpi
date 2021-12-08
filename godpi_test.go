@@ -1,11 +1,12 @@
 package godpi
 
 import (
-	"github.com/mushorg/go-dpi/types"
-	"github.com/mushorg/go-dpi/utils"
 	"io/ioutil"
 	"path"
 	"testing"
+
+	"github.com/mushorg/go-dpi/types"
+	"github.com/mushorg/go-dpi/utils"
 )
 
 func TestInitializeError(t *testing.T) {

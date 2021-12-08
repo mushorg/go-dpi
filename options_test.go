@@ -1,8 +1,9 @@
 package godpi
 
 import (
-	"github.com/mushorg/go-dpi/modules/ml"
 	"testing"
+
+	"github.com/mushorg/go-dpi/modules/ml"
 )
 
 func TestMLOption(t *testing.T) {

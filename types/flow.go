@@ -3,10 +3,11 @@ package types
 
 import (
 	"fmt"
-	"github.com/google/gopacket"
-	"github.com/patrickmn/go-cache"
 	"sync"
 	"time"
+
+	"github.com/google/gopacket"
+	"github.com/patrickmn/go-cache"
 )
 
 var flowTracker *cache.Cache
