@@ -33,6 +33,7 @@ jobs:
     - name: Lint/Vet
       run: |
         go vet ./...
+        go get -u golang.org/x/lint/golint
         golint ./...
 
     - name: Test
